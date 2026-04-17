@@ -50,8 +50,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         // Start auto-refresh every 5 seconds
         refreshTimer?.invalidate()
         refreshTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                guard let self else { return }
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
                 self.monitor.refresh()
                 if ProcessesPanel.shared.isVisible {
                     ProcessesPanel.shared.update(
@@ -64,8 +64,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
         // Monitor clicks outside our windows to close everything
         clickOutsideMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
-            Task { @MainActor in
-                guard let self else { return }
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
                 let mouseLocation = NSEvent.mouseLocation
                 let clickedPopover = self.popover.isShown && NSApp.windows.contains { window in
                     window.isVisible && window.frame.contains(mouseLocation)
