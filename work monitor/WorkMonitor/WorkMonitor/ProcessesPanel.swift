@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import WorkMonitorCore
 
 /// Floating panel that shows top memory-consuming processes.
 /// Appears to the right of the main popover.
@@ -9,7 +10,7 @@ final class ProcessesPanel {
 
     private var panel: NSPanel?
     private var hostingView: NSHostingView<ProcessesDetailView>?
-    private let panelWidth: CGFloat = 340
+    private let panelWidth: CGFloat = 372
     private let panelHeight: CGFloat = 560
 
     private init() {}
@@ -193,44 +194,46 @@ struct ProcessesDetailView: View {
                 Spacer()
                 Button(action: { viewModel.onClose?() }) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(.caption2.weight(.semibold))
                         .foregroundColor(.secondary)
                 }
                 .buttonStyle(.plain)
                 .focusable(false)
                 .onHover { h in if h { NSCursor.pointingHand.push() } else { NSCursor.pop() } }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 14)
-            .padding(.bottom, 10)
+            .padding(.horizontal, 14)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
 
             Divider()
 
-            // Sortable column headers
+            // Sortable column headers (widths match ProcessRow)
             HStack(spacing: 0) {
                 Text("#")
-                    .frame(width: 22, alignment: .leading)
+                    .font(.caption2.monospaced())
+                    .foregroundColor(.secondary)
+                    .frame(width: 28, alignment: .trailing)
 
                 SortableHeader(title: "Process", field: .name, current: viewModel.sortBy, ascending: viewModel.sortAscending) {
                     viewModel.toggleSort(.name)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.leading, 6)
 
                 SortableHeader(title: "Memory", field: .memory, current: viewModel.sortBy, ascending: viewModel.sortAscending) {
                     viewModel.toggleSort(.memory)
                 }
-                .frame(width: 65, alignment: .trailing)
+                .frame(width: 68, alignment: .trailing)
 
                 SortableHeader(title: "%", field: .percent, current: viewModel.sortBy, ascending: viewModel.sortAscending) {
                     viewModel.toggleSort(.percent)
                 }
-                .frame(width: 35, alignment: .trailing)
+                .frame(width: 38, alignment: .trailing)
 
-                // Space for kill button
                 Spacer().frame(width: 28)
             }
             .font(.caption2)
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 14)
             .padding(.vertical, 6)
 
             Divider()
@@ -253,7 +256,7 @@ struct ProcessesDetailView: View {
                                 ProcessRow(index: index + 1, process: proc, onKill: nil)
 
                                 if index < viewModel.systemProcesses.count - 1 {
-                                    Divider().opacity(0.3).padding(.horizontal, 16)
+                                    Divider().opacity(0.3).padding(.horizontal, 14)
                                 }
                             }
                         }
@@ -276,7 +279,7 @@ struct ProcessesDetailView: View {
                                 })
 
                                 if index < viewModel.userProcesses.count - 1 {
-                                    Divider().opacity(0.3).padding(.horizontal, 16)
+                                    Divider().opacity(0.3).padding(.horizontal, 14)
                                 }
                             }
                         }
@@ -288,66 +291,71 @@ struct ProcessesDetailView: View {
             Divider()
 
             // Footer with memory breakdown
-            VStack(spacing: 6) {
+            VStack(alignment: .leading, spacing: 5) {
                 let trackedGB = viewModel.processes.reduce(0.0) { $0 + $1.memoryMB } / 1024
 
                 HStack {
-                    Text("Отслеживается:")
+                    Text("Listed in table")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     Spacer()
                     Text(String(format: "%.1f GB", trackedGB))
-                        .font(.system(.caption2, design: .monospaced))
+                        .font(.caption2.monospaced())
                         .fontWeight(.medium)
+                        .foregroundColor(.primary)
                 }
 
                 HStack {
-                    Text("Wired (ядро):")
+                    Text("Wired (kernel)")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     Spacer()
                     Text(String(format: "%.1f GB", viewModel.wiredGB))
-                        .font(.system(.caption2, design: .monospaced))
+                        .font(.caption2.monospaced())
+                        .foregroundColor(.primary)
                 }
 
                 HStack {
-                    Text("Compressed:")
+                    Text("Compressed")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     Spacer()
                     Text(String(format: "%.1f GB", viewModel.compressedGB))
-                        .font(.system(.caption2, design: .monospaced))
+                        .font(.caption2.monospaced())
+                        .foregroundColor(.primary)
                 }
 
-                Divider().opacity(0.3)
+                Divider().opacity(0.25)
 
                 HStack {
-                    Text("Всего используется:")
+                    Text("Total used")
                         .font(.caption2)
                         .fontWeight(.medium)
                         .foregroundColor(.secondary)
                     Spacer()
                     Text(String(format: "%.1f / %.0f GB", viewModel.usedGB, viewModel.totalGB))
-                        .font(.system(.caption2, design: .monospaced))
+                        .font(.caption2.monospaced())
                         .fontWeight(.medium)
+                        .foregroundColor(.primary)
                 }
 
                 let gap = viewModel.usedGB - trackedGB - viewModel.wiredGB
                 if gap > 0.5 {
-                    Text("Δ \(String(format: "%.1f", gap)) GB — кэши, буферы, GPU, мелкие процессы")
-                        .font(.system(size: 9))
-                        .foregroundColor(.secondary.opacity(0.7))
+                    Text("≈ \(String(format: "%.1f", gap)) GB not in table — caches, buffers, GPU, small processes")
+                        .font(.caption2)
+                        .foregroundColor(.secondary.opacity(0.75))
+                        .multilineTextAlignment(.trailing)
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
             }
             .foregroundColor(.secondary)
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 14)
             .padding(.vertical, 8)
         }
-        .frame(width: 340, height: 560)
+        .frame(width: 372, height: 560)
         .background(Color(nsColor: .windowBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .shadow(color: .black.opacity(0.12), radius: 10, y: 3)
     }
 
     private func formatMemory(_ mb: Double) -> String {
@@ -373,7 +381,7 @@ struct SortableHeader: View {
                     .foregroundColor(field == current ? .accentColor : .secondary)
                 if field == current {
                     Image(systemName: ascending ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 7, weight: .bold))
+                        .font(.caption2.weight(.bold))
                         .foregroundColor(.accentColor)
                 }
             }
@@ -397,11 +405,11 @@ struct ProcessSectionHeader: View {
         Button(action: { withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() } }) {
             HStack(spacing: 6) {
                 Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                    .font(.system(size: 8, weight: .semibold))
+                    .font(.caption2.weight(.semibold))
                     .foregroundColor(.secondary)
                     .frame(width: 10)
                 Image(systemName: icon)
-                    .font(.system(size: 9))
+                    .font(.caption2)
                     .foregroundColor(.secondary)
                 Text(title)
                     .font(.caption)
@@ -412,12 +420,12 @@ struct ProcessSectionHeader: View {
                     .foregroundColor(.secondary.opacity(0.7))
                 Spacer()
                 Text(formatMemory(totalMB))
-                    .font(.system(.caption2, design: .monospaced))
+                    .font(.caption2.monospaced())
                     .foregroundColor(.secondary)
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 14)
             .padding(.vertical, 6)
-            .background(Color.gray.opacity(0.08))
+            .background(Color.gray.opacity(0.06))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -439,48 +447,54 @@ struct ProcessRow: View {
     var onKill: (() -> Void)?
     @State private var isHovered = false
 
-    var body: some View {
-        HStack(spacing: 0) {
-            Text(verbatim: "\(index)")
-                .font(.system(.caption2, design: .monospaced))
-                .foregroundColor(.secondary.opacity(0.6))
-                .frame(width: 22, alignment: .leading)
+    private let miniBarHeight: CGFloat = 4
 
-            VStack(alignment: .leading, spacing: 2) {
+    var body: some View {
+        HStack(alignment: .top, spacing: 0) {
+            Text(verbatim: String(format: "%2d", index))
+                .font(.caption2.monospaced())
+                .foregroundColor(.secondary.opacity(0.65))
+                .frame(width: 28, alignment: .trailing)
+
+            VStack(alignment: .leading, spacing: 3) {
                 Text(process.name)
                     .font(.caption)
                     .fontWeight(.medium)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .help(process.name)
 
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
                         RoundedRectangle(cornerRadius: 2)
-                            .fill(Color.gray.opacity(0.12))
-                            .frame(height: 3)
+                            .fill(Color.primary.opacity(0.06))
+                            .frame(height: miniBarHeight)
                         RoundedRectangle(cornerRadius: 2)
-                            .fill(barColor)
-                            .frame(width: max(0, geo.size.width * min(process.memoryPercent / 100, 1.0)), height: 3)
+                            .fill(barColor.opacity(0.9))
+                            .frame(width: max(0, geo.size.width * min(process.memoryPercent / 100, 1.0)), height: miniBarHeight)
                     }
                 }
-                .frame(height: 3)
+                .frame(height: miniBarHeight)
             }
+            .padding(.leading, 6)
             .frame(maxWidth: .infinity, alignment: .leading)
 
             Text(formatMemory(process.memoryMB))
-                .font(.system(.caption2, design: .monospaced))
+                .font(.caption2.monospaced())
                 .foregroundColor(.primary)
-                .frame(width: 65, alignment: .trailing)
+                .frame(width: 68, alignment: .trailing)
 
             Text(String(format: "%.1f", process.memoryPercent))
-                .font(.system(.caption2, design: .monospaced))
+                .font(.caption2.monospaced())
                 .foregroundColor(.secondary)
-                .frame(width: 35, alignment: .trailing)
+                .frame(width: 38, alignment: .trailing)
 
             // Kill button — only for user processes (onKill != nil)
             if let killAction = onKill {
                 Button(action: { killAction() }) {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 12))
+                        .font(.body)
                         .foregroundColor(isHovered ? .red : .clear)
                 }
                 .buttonStyle(.plain)
@@ -491,9 +505,9 @@ struct ProcessRow: View {
                 Spacer().frame(width: 28)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 5)
-        .background(isHovered ? Color.gray.opacity(0.08) : Color.clear)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 6)
+        .background(isHovered ? Color.primary.opacity(0.04) : Color.clear)
         .onHover { isHovered = $0 }
     }
 

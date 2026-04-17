@@ -66,13 +66,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         clickOutsideMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
             Task { @MainActor in
                 guard let self else { return }
-                // Check if click is outside our windows
-                let clickedOurWindow = NSApp.windows.contains { window in
-                    window.isVisible && window.frame.contains(event.locationInWindow == .zero
-                        ? NSEvent.mouseLocation
-                        : event.locationInWindow)
-                }
-                // Use mouse location in screen coordinates
                 let mouseLocation = NSEvent.mouseLocation
                 let clickedPopover = self.popover.isShown && NSApp.windows.contains { window in
                     window.isVisible && window.frame.contains(mouseLocation)

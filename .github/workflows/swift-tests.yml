@@ -1,0 +1,17 @@
+name: Swift tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Swift PM tests
+        run: swift test -c release
+        working-directory: "work monitor/WorkMonitor"

@@ -1,4 +1,10 @@
+import AppKit
 import SwiftUI
+import WorkMonitorCore
+
+private enum SupportLinks {
+    static let boostyDonate = URL(string: "https://boosty.to/genius_me/donate")!
+}
 
 struct DashboardView: View {
     @ObservedObject var monitor: SystemMonitor
@@ -10,7 +16,7 @@ struct DashboardView: View {
                 AboutView(onBack: { withAnimation(.easeInOut(duration: 0.2)) { showAbout = false } })
             } else {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 12) {
                         headerView
                         MemorySectionView(memory: monitor.memory, topProcesses: monitor.topProcesses)
                         PortsSectionView(ports: monitor.ports)
@@ -28,7 +34,7 @@ struct DashboardView: View {
                     Button(action: { withAnimation(.easeInOut(duration: 0.2)) { showAbout = true } }) {
                         HStack(spacing: 4) {
                             Image(systemName: "info.circle")
-                                .font(.system(size: 9))
+                                .font(.caption2)
                             Text("About")
                                 .font(.caption2)
                         }
@@ -40,20 +46,36 @@ struct DashboardView: View {
 
                     Spacer()
 
-                    Button(action: { NSApp.terminate(nil) }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "power")
-                                .font(.system(size: 9))
-                            Text("Quit")
-                                .font(.caption2)
+                    HStack(spacing: 14) {
+                        Button(action: { NSWorkspace.shared.open(SupportLinks.boostyDonate) }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "heart.fill")
+                                    .font(.caption2)
+                                Text("Boosty")
+                                    .font(.caption2)
+                            }
+                            .foregroundColor(.accentColor)
                         }
-                        .foregroundColor(.secondary)
+                        .buttonStyle(.plain)
+                        .focusable(false)
+                        .help("Ports, Docker, memory, and processes in one menu bar app—support on Boosty if it helps you.")
+                        .onHover { h in if h { NSCursor.pointingHand.push() } else { NSCursor.pop() } }
+
+                        Button(action: { NSApp.terminate(nil) }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "power")
+                                    .font(.caption2)
+                                Text("Quit")
+                                    .font(.caption2)
+                            }
+                            .foregroundColor(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .focusable(false)
+                        .onHover { h in if h { NSCursor.pointingHand.push() } else { NSCursor.pop() } }
                     }
-                    .buttonStyle(.plain)
-                    .focusable(false)
-                    .onHover { h in if h { NSCursor.pointingHand.push() } else { NSCursor.pop() } }
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 14)
                 .padding(.vertical, 6)
             }
         }
@@ -88,10 +110,32 @@ struct MemorySectionView: View {
     let topProcesses: [ProcessMemoryInfo]
 
     var body: some View {
-        SectionContainer(title: "Memory", icon: "memorychip") {
-            VStack(alignment: .leading, spacing: 10) {
+        SectionContainer(title: "Memory", icon: "memorychip", headerTrailing: {
+            Button(action: {
+                ProcessesPanel.shared.toggle(processes: topProcesses, memory: memory)
+            }) {
+                HStack(spacing: 4) {
+                    Image(systemName: "list.bullet.rectangle")
+                        .font(.caption2.weight(.medium))
+                    Text("Processes")
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(.accentColor)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.accentColor.opacity(0.12))
+                .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .focusable(false)
+            .onHover { hovering in
+                if hovering { NSCursor.pointingHand.push() } else { NSCursor.pop() }
+            }
+        }) {
+            VStack(alignment: .leading, spacing: 8) {
                 // Main bar
-                HStack {
+                HStack(alignment: .center, spacing: 8) {
                     ProgressBarView(
                         value: memory.usagePercent / 100,
                         color: memoryColor,
@@ -100,18 +144,18 @@ struct MemorySectionView: View {
                     Text(String(format: "%.1f / %.0f GB", memory.usedGB, memory.totalGB))
                         .font(.caption)
                         .foregroundColor(.secondary)
-                        .frame(width: 90, alignment: .trailing)
+                        .frame(width: 88, alignment: .trailing)
                 }
 
                 // Breakdown
-                HStack(spacing: 16) {
+                HStack(spacing: 14) {
                     MemoryChip(label: "Apps", value: memory.appMemoryGB, color: .blue)
                     MemoryChip(label: "Wired", value: memory.wiredGB, color: .orange)
                     MemoryChip(label: "Compressed", value: memory.compressedGB, color: .purple)
                 }
 
                 // Swap
-                HStack {
+                HStack(alignment: .center, spacing: 8) {
                     ProgressBarView(
                         value: memory.swapPercent / 100,
                         color: memory.swapUsedGB > 2 ? .red : .yellow,
@@ -120,36 +164,17 @@ struct MemorySectionView: View {
                     Text(String(format: "%.1f / %.1f GB", memory.swapUsedGB, memory.swapTotalGB))
                         .font(.caption)
                         .foregroundColor(.secondary)
-                        .frame(width: 90, alignment: .trailing)
+                        .frame(width: 88, alignment: .trailing)
                 }
 
-                // Pressure + detail button
                 HStack(spacing: 6) {
                     Circle()
                         .fill(pressureColor)
-                        .frame(width: 8, height: 8)
+                        .frame(width: 6, height: 6)
                     Text("Pressure: \(memory.pressure.rawValue)")
                         .font(.caption)
                         .foregroundColor(.secondary)
-
-                    Spacer()
-
-                    Button(action: {
-                        ProcessesPanel.shared.toggle(processes: topProcesses, memory: memory)
-                    }) {
-                        HStack(spacing: 3) {
-                            Image(systemName: "list.bullet.rectangle")
-                                .font(.system(size: 10))
-                            Text("Processes")
-                                .font(.caption2)
-                        }
-                        .foregroundColor(.accentColor)
-                    }
-                    .buttonStyle(.plain)
-                    .focusable(false)
-                    .onHover { hovering in
-                        if hovering { NSCursor.pointingHand.push() } else { NSCursor.pop() }
-                    }
+                    Spacer(minLength: 0)
                 }
             }
         }
@@ -212,12 +237,12 @@ struct TopProcessesView: View {
                     .frame(width: 60, height: 4)
 
                     Text(formatMemory(proc.memoryMB))
-                        .font(.system(.caption2, design: .monospaced))
+                        .font(.caption2.monospaced())
                         .foregroundColor(.secondary)
                         .frame(width: 65, alignment: .trailing)
 
                     Text(verbatim: String(proc.pid))
-                        .font(.system(.caption2, design: .monospaced))
+                        .font(.caption2.monospaced())
                         .foregroundColor(.secondary.opacity(0.6))
                         .frame(width: 45, alignment: .trailing)
                 }
@@ -311,7 +336,7 @@ struct PortGroupRow: View {
             Button(action: { withAnimation(.easeInOut(duration: 0.15)) { isGroupExpanded.toggle() } }) {
                 HStack(spacing: 8) {
                     Image(systemName: isGroupExpanded ? "chevron.down" : "chevron.right")
-                        .font(.system(size: 8, weight: .semibold))
+                        .font(.caption2.weight(.semibold))
                         .foregroundColor(.secondary)
                         .frame(width: 10)
 
@@ -327,10 +352,10 @@ struct PortGroupRow: View {
                                 HStack(spacing: 2) {
                                     if port.hasWebUI {
                                         Image(systemName: "globe")
-                                            .font(.system(size: 8))
+                                            .font(.caption2)
                                     }
                                     Text(verbatim: String(port.port))
-                                        .font(.system(.caption2, design: .monospaced))
+                                        .font(.caption2.monospaced())
                                 }
                                 .padding(.horizontal, 5)
                                 .padding(.vertical, 1)
@@ -358,12 +383,12 @@ struct PortGroupRow: View {
                         VStack(alignment: .leading, spacing: 2) {
                             HStack {
                                 Text(verbatim: String(port.port))
-                                    .font(.system(.caption, design: .monospaced))
+                                    .font(.caption.monospaced())
                                     .fontWeight(.medium)
                                     .foregroundColor(.accentColor)
                                     .frame(width: 60, alignment: .leading)
                                 Text(port.address)
-                                    .font(.system(.caption2, design: .monospaced))
+                                    .font(.caption2.monospaced())
                                     .foregroundColor(.secondary)
                                     .frame(width: 80, alignment: .leading)
 
@@ -382,7 +407,7 @@ struct PortGroupRow: View {
                                     Button(action: { NSWorkspace.shared.open(url) }) {
                                         HStack(spacing: 3) {
                                             Image(systemName: "globe")
-                                                .font(.system(size: 9))
+                                                .font(.caption2)
                                             Text("Open")
                                                 .font(.caption2)
                                         }
@@ -394,7 +419,7 @@ struct PortGroupRow: View {
                                 }
 
                                 Text(verbatim: "PID \(port.pid)")
-                                    .font(.system(.caption2, design: .monospaced))
+                                    .font(.caption2.monospaced())
                                     .foregroundColor(.secondary)
                             }
                         }
@@ -491,7 +516,7 @@ struct DockerSectionView: View {
                                         .lineLimit(1)
                                     if !container.ports.isEmpty {
                                         Text(container.ports)
-                                            .font(.system(.caption2, design: .monospaced))
+                                            .font(.caption2.monospaced())
                                             .foregroundColor(.accentColor)
                                             .lineLimit(1)
                                     }
@@ -518,20 +543,35 @@ struct DockerSectionView: View {
 
 // MARK: - Reusable Components
 
-struct SectionContainer<Content: View>: View {
+struct SectionContainer<Content: View, HeaderTrailing: View>: View {
     let title: String
     let icon: String
     var badge: String? = nil
+    @ViewBuilder let headerTrailing: () -> HeaderTrailing
     @ViewBuilder let content: Content
 
+    init(
+        title: String,
+        icon: String,
+        badge: String? = nil,
+        @ViewBuilder headerTrailing: @escaping () -> HeaderTrailing,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.title = title
+        self.icon = icon
+        self.badge = badge
+        self.headerTrailing = headerTrailing
+        self.content = content()
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .center, spacing: 6) {
                 Image(systemName: icon)
                     .font(.caption)
                     .foregroundColor(.accentColor)
                 Text(title)
-                    .font(.headline)
+                    .font(.subheadline)
                     .fontWeight(.semibold)
                 if let badge = badge {
                     Text(badge)
@@ -539,17 +579,25 @@ struct SectionContainer<Content: View>: View {
                         .fontWeight(.medium)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Color.accentColor.opacity(0.15))
+                        .background(Color.accentColor.opacity(0.12))
                         .foregroundColor(.accentColor)
                         .clipShape(Capsule())
                 }
-                Spacer()
+                Spacer(minLength: 4)
+                headerTrailing()
             }
             content
         }
-        .padding(12)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
         .background(Color(nsColor: .controlBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+extension SectionContainer where HeaderTrailing == EmptyView {
+    init(title: String, icon: String, badge: String? = nil, @ViewBuilder content: () -> Content) {
+        self.init(title: title, icon: icon, badge: badge, headerTrailing: { EmptyView() }, content: content)
     }
 }
 
@@ -566,7 +614,7 @@ struct AboutView: View {
 
                     // App icon
                     Image(systemName: "gearshape.2.fill")
-                        .font(.system(size: 48))
+                        .font(.largeTitle)
                         .foregroundColor(.accentColor)
 
                     // Title & version
@@ -579,12 +627,23 @@ struct AboutView: View {
                             .foregroundColor(.secondary)
                     }
 
-                    // Description
-                    Text("Dev environment dashboard for macOS. Monitors ports, Docker containers, memory usage, and running processes from your menu bar.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 40)
+                    // Why it exists (also used as context for Boosty / supporters)
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(
+                            "Checking Docker, listening ports, memory, and heavy processes used to mean jumping between different apps and terminals. That got old fast."
+                        )
+                        Text(
+                            "Work Monitor is one small menu bar utility that pulls it together—ports, containers, RAM, swap, pressure, and top processes—so you get a quick read on what's actually running, without hunting through everything separately."
+                        )
+                        Text(
+                            "I built it for day-to-day work and keep it lean on purpose: open the popover, glance, move on. If it saves you time too, you're welcome to chip in on Boosty."
+                        )
+                    }
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 28)
 
                     Divider().padding(.horizontal, 40)
 
@@ -608,6 +667,40 @@ struct AboutView: View {
                     }
                     .padding(.horizontal, 30)
 
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Support")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                        Text(
+                            "Boosty is the place to tip or follow if you want more of these small, practical macOS tools—your support goes straight into updates and new ideas."
+                        )
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 28)
+                    .padding(.top, 4)
+
+                    Button(action: { NSWorkspace.shared.open(SupportLinks.boostyDonate) }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "heart.fill")
+                                .font(.subheadline)
+                            Text("Support on Boosty")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+                        .foregroundColor(.accentColor)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .background(Color.accentColor.opacity(0.12))
+                        .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .focusable(false)
+                    .padding(.top, 2)
+                    .onHover { h in if h { NSCursor.pointingHand.push() } else { NSCursor.pop() } }
+
                     Spacer().frame(height: 10)
                 }
             }
@@ -618,7 +711,7 @@ struct AboutView: View {
                 Button(action: onBack) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 9, weight: .semibold))
+                            .font(.caption2.weight(.semibold))
                         Text("Back")
                             .font(.caption2)
                     }
@@ -645,7 +738,7 @@ struct AboutFeatureRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: icon)
-                .font(.system(size: 14))
+                .font(.subheadline)
                 .foregroundColor(color)
                 .frame(width: 24)
             VStack(alignment: .leading, spacing: 2) {
@@ -671,7 +764,7 @@ struct AboutInfoRow: View {
                 .foregroundColor(.secondary)
             Spacer()
             Text(value)
-                .font(.system(.caption2, design: .monospaced))
+                .font(.caption2.monospaced())
                 .foregroundColor(.primary)
         }
     }
@@ -682,30 +775,32 @@ struct ProgressBarView: View {
     let color: Color
     let label: String
 
+    private let barHeight: CGFloat = 5
+
     var body: some View {
         HStack(spacing: 8) {
             Text(label)
                 .font(.caption2)
                 .foregroundColor(.secondary)
-                .frame(width: 35, alignment: .leading)
+                .frame(width: 34, alignment: .leading)
 
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(height: 6)
+                    RoundedRectangle(cornerRadius: 2.5)
+                        .fill(Color.primary.opacity(0.06))
+                        .frame(height: barHeight)
 
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(color)
-                        .frame(width: max(0, geo.size.width * min(value, 1.0)), height: 6)
+                    RoundedRectangle(cornerRadius: 2.5)
+                        .fill(color.opacity(0.92))
+                        .frame(width: max(0, geo.size.width * min(value, 1.0)), height: barHeight)
                 }
             }
-            .frame(height: 6)
+            .frame(height: barHeight)
 
             Text(String(format: "%.0f%%", value * 100))
-                .font(.system(.caption2, design: .monospaced))
+                .font(.caption2.monospaced())
                 .foregroundColor(.secondary)
-                .frame(width: 35, alignment: .trailing)
+                .frame(width: 34, alignment: .trailing)
         }
     }
 }

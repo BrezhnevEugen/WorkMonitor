@@ -5,10 +5,20 @@ let package = Package(
     name: "WorkMonitor",
     platforms: [.macOS(.v13)],
     targets: [
+        .target(
+            name: "WorkMonitorCore",
+            path: "WorkMonitorCore/Sources/WorkMonitorCore"
+        ),
         .executableTarget(
             name: "WorkMonitor",
+            dependencies: ["WorkMonitorCore"],
             path: "WorkMonitor",
             exclude: ["Info.plist"]
+        ),
+        .testTarget(
+            name: "WorkMonitorCoreTests",
+            dependencies: ["WorkMonitorCore"],
+            path: "Tests/WorkMonitorCoreTests"
         )
     ]
 )
