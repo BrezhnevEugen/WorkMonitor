@@ -25,85 +25,15 @@ work monitor/WorkMonitor/
 
 ## Build
 
-From the package directory:
+From `work monitor/WorkMonitor/`:
 
 ```bash
-cd "work monitor/WorkMonitor"
-swift build -c release
+swift build -c release          # binary only
+./build.sh                        # WorkMonitor.app (optional: export CODESIGN_IDENTITY to sign)
+./build-dmg.sh                    # DMG for distribution — Apple/notary env vars: see script comments at top
 ```
 
-Build a **`.app`** (copies the binary and `Info.plist`). If **`CODESIGN_IDENTITY`** is exported, `build.sh` also **codesigns** the bundle (hardened runtime + `WorkMonitor.entitlements`):
-
-```bash
-cd "work monitor/WorkMonitor"
-# optional, for release / notarization pipeline:
-# export CODESIGN_IDENTITY='Developer ID Application: Your Name (TEAMID)'
-./build.sh
-open WorkMonitor.app
-```
-
-## DMG, code signing, and notarization
-
-From the same package directory, [`build-dmg.sh`](work%20monitor/WorkMonitor/build-dmg.sh) runs `build.sh`, packs **`WorkMonitor-<version>.dmg`** (compressed UDZO with the `.app` and an **Applications** shortcut), optionally **signs the app** with the **hardened runtime**, then **notarizes** and **staples** the DMG when you provide credentials.
-
-Entitlements used for release signing: [`WorkMonitor.entitlements`](work%20monitor/WorkMonitor/WorkMonitor/WorkMonitor.entitlements) (outbound network for localhost HTTP checks; app sandbox stays off so `lsof` / `docker` / `ps` via `Process` keep working).
-
-### Unsigned DMG (local / CI artifact)
-
-```bash
-cd "work monitor/WorkMonitor"
-./build-dmg.sh
-```
-
-The `.dmg` is listed in `.gitignore` and is not committed.
-
-### Signed + notarized (release)
-
-1. **Apple Developer**: “Developer ID Application” certificate installed in Keychain.  
-2. **Export** your signing identity (example):
-
-   ```bash
-   export CODESIGN_IDENTITY='Developer ID Application: Your Name (XXXXXXXXXX)'
-   ```
-
-3. **Notarytool** — choose one authentication method:
-
-   - **Keychain profile** (good for laptops):
-
-     ```bash
-     xcrun notarytool store-credentials "workmonitor-notary" \
-       --apple-id "you@example.com" \
-       --team-id "YOUR10CHARTEAMID" \
-       --password "abcd-abcd-abcd-abcd"
-     export NOTARY_KEYCHAIN_PROFILE=workmonitor-notary
-     ```
-
-     Use an [app-specific password](https://support.apple.com/en-us/102654) for `--password`, not your Apple ID login password.
-
-   - **Environment variables** (CI-friendly, app-specific password):
-
-     ```bash
-     export APPLE_ID=you@example.com
-     export APPLE_TEAM_ID=YOUR10CHARTEAMID
-     export APPLE_APP_PASSWORD=abcd-abcd-abcd-abcd
-     ```
-
-   - **App Store Connect API key** (recommended for automation):
-
-     ```bash
-     export NOTARY_KEY_PATH=/path/to/AuthKey_XXXXXXXXXX.p8
-     export NOTARY_KEY_ID=XXXXXXXXXX
-     export NOTARY_ISSUER=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-     ```
-
-4. **Run** (with `CODESIGN_IDENTITY` plus one of the notary options above):
-
-   ```bash
-   cd "work monitor/WorkMonitor"
-   ./build-dmg.sh
-   ```
-
-The script waits on `notarytool submit --wait`, then runs **`stapler staple`** and **`stapler validate`** on the DMG. A local **`spctl --assess`** is printed for a quick check (it can still warn depending on context; Gatekeeper on a clean Mac is the real check).
+The `.dmg` is gitignored.
 
 ## Tests
 
