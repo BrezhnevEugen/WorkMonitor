@@ -1,66 +1,48 @@
 # Work Monitor
 
-A **macOS 13+** **menu bar–only** utility: listening ports, Docker, memory, and top processes in one popover from the status item—no Dock window.
+**Work Monitor** — небольшая утилита для **macOS 13 и новее**, которая живёт **только в строке меню** (рядом с часами и системными иконками). Отдельного окна в Dock у приложения **нет**: вы открываете компактную панель по клику на иконку и сразу видите картину по машине.
 
-Repository: [github.com/BrezhnevEugen/WorkMonitor](https://github.com/BrezhnevEugen/WorkMonitor)
+Репозиторий с исходным кодом: [github.com/BrezhnevEugen/WorkMonitor](https://github.com/BrezhnevEugen/WorkMonitor)
 
-## Features
+## Зачем он
 
-- **Memory** — RAM usage, swap, pressure, breakdown (apps / wired / compressed); **Processes** opens a side panel with RSS-based top processes and the ability to terminate **user** processes.
-- **Ports** — listening TCP sockets (`lsof`), grouped by process; optional web UI hint via `http://localhost:PORT`.
-- **Docker** — `docker ps -a` (status, image, port mappings) when the Docker CLI is available.
-- **About** — overview and optional support on [Boosty](https://boosty.to/genius_me/donate).
+Часто при разработке и отладке приходится по отдельности смотреть **Docker**, **какие порты слушают процессы**, **сколько съели памяти** и **кто именно жрёт RAM**. Work Monitor **сводит это в одно место** — одна панель из меню, быстрый обзор без переключения между кучей утилит и терминалов.
 
-## Project layout
+## Как пользоваться
 
-SwiftPM sources and the app bundle script live here:
+1. Запустите приложение — в строке меню появится **иконка** (шестерёнки).
+2. **Клик** по иконке открывает **всплывающую панель** с обзором.
+3. Панель **сама обновляет данные каждые несколько секунд**, пока открыта (чтобы цифры не устаревали, пока вы смотрите).
+4. Внизу панели — **About** (о программе) и выход (**Quit**).
 
-```text
-work monitor/WorkMonitor/
-  Package.swift
-  WorkMonitor/              # executable target (SwiftUI + AppKit)
-  WorkMonitorCore/          # models + CLI output parsers
-  Tests/WorkMonitorCoreTests/
-```
+Никакой сложной настройки: установили или запустили из `.app` — иконка уже в меню.
 
-## Build
+## Что внутри панели
 
-From `work monitor/WorkMonitor/`:
+### Память
 
-```bash
-swift build -c release          # binary only
-./build.sh                        # WorkMonitor.app (optional: export CODESIGN_IDENTITY to sign)
-./build-dmg.sh                    # DMG for distribution — Apple/notary env vars: see script comments at top
-```
+Сколько занято **оперативной памяти**, **swap**, каков **уровень давления** (pressure), разбивка по типам (приложения, wired, сжатая память). Кнопка **Processes** открывает **вторую узкую панель** рядом: список процессов, которые больше всего потребляют память, с разделением на системные и пользовательские. Для **своих** процессов можно завершить задачу (осторожно: это принудительное завершение).
 
-The `.dmg` is gitignored.
+### Порты
 
-## Tests
+Какие **TCP-порты** сейчас в состоянии **прослушивания**, к какому **процессу** они относятся, на каком **адресе** слушают. Список можно **развернуть** по приложениям. Если на порту отвечает похожий на веб сервис, утилита может **подсказать** и дать открыть страницу в браузере (проверка идёт на `localhost`).
 
-Unit tests cover parsers (`lsof`, Docker `ps` format, memory stats, `ps` RSS lines, HTML `<title>` extraction):
+### Docker
 
-```bash
-cd "work monitor/WorkMonitor"
-swift test
-```
+Если **Docker** у вас установлен и демон запущен, показывается список **контейнеров** (статус, образ, проброс портов в строке). Если Docker недоступен, выводится понятное сообщение, а не «молчаливый» пустой блок.
 
-CI: [`.github/workflows/swift-tests.yml`](.github/workflows/swift-tests.yml) runs `swift test -c release` on `macos-15` for pushes and pull requests to `main`.
+### О программе и поддержка
 
-## Git hooks
+В разделе **About** — кратко, что за программа и зачем она сделана. При желании можно **поддержать автора** на [Boosty](https://boosty.to/genius_me/donate).
 
-After `git clone`, run once:
+## Как это устроено «под капотом» (коротко, по смыслу)
 
-```bash
-./scripts/install-git-hooks.sh
-```
+Приложение **не заменяет** системные мониторы целиком — оно **считывает** уже известные macOS и окружению данные (системные отчёты о памяти, список слушающих сокетов, при наличии — вывод Docker) и **показывает их в одном интерфейсе**. Так вы быстрее понимаете, **что сейчас происходит** на машине, а не копаетесь по отдельности.
 
-This sets `core.hooksPath` to `.githooks`. The `commit-msg` hook strips the `Made-with: Cursor` trailer from commit messages.
+## Требования
 
-## Requirements
+- **macOS 13** (Ventura) или новее.
 
-- macOS **13** or later  
-- Xcode / Swift **5.9** (or a toolchain that can build this package)
+## Лицензия
 
-## License
-
-See [LICENSE](LICENSE) in the repository root.
+Текст лицензии — в файле [LICENSE](LICENSE) в корне репозитория.
