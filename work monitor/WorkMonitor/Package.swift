@@ -13,7 +13,7 @@ let package = Package(
             name: "WorkMonitor",
             dependencies: ["WorkMonitorCore"],
             path: "WorkMonitor",
-            exclude: ["Info.plist"]
+            exclude: ["Info.plist", "WorkMonitor.entitlements"]
         ),
         .testTarget(
             name: "WorkMonitorCoreTests",
