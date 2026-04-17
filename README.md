@@ -1,70 +1,70 @@
 # Work Monitor
 
-Утилита для **macOS 13+** в виде приложения только в **меню-баре**: порты, Docker, память и топ процессов — в одном окне из статус-бара, без отдельного окна в Dock.
+A **macOS 13+** **menu bar–only** utility: listening ports, Docker, memory, and top processes in one popover from the status item—no Dock window.
 
-Репозиторий: [github.com/BrezhnevEugen/WorkMonitor](https://github.com/BrezhnevEugen/WorkMonitor)
+Repository: [github.com/BrezhnevEugen/WorkMonitor](https://github.com/BrezhnevEugen/WorkMonitor)
 
-## Возможности
+## Features
 
-- **Память** — использование RAM, swap, давление, разбивка (apps / wired / compressed); кнопка **Processes** открывает панель с топом по RSS и завершением пользовательских процессов.
-- **Порты** — слушающие TCP (`lsof`), группировка по процессу; эвристика веб-интерфейса по `http://localhost:PORT`.
-- **Docker** — `docker ps -a` (статусы, образы, порты), если CLI доступен.
-- **About** — описание и ссылка на поддержку [Boosty](https://boosty.to/genius_me/donate).
+- **Memory** — RAM usage, swap, pressure, breakdown (apps / wired / compressed); **Processes** opens a side panel with RSS-based top processes and the ability to terminate **user** processes.
+- **Ports** — listening TCP sockets (`lsof`), grouped by process; optional web UI hint via `http://localhost:PORT`.
+- **Docker** — `docker ps -a` (status, image, port mappings) when the Docker CLI is available.
+- **About** — overview and optional support on [Boosty](https://boosty.to/genius_me/donate).
 
-## Расположение кода
+## Project layout
 
-Исходники Swift Package Manager и приложение:
+SwiftPM sources and the app bundle script live here:
 
 ```text
 work monitor/WorkMonitor/
   Package.swift
-  WorkMonitor/              # исполняемый таргет (SwiftUI + AppKit)
-  WorkMonitorCore/          # модели и парсеры вывода CLI
+  WorkMonitor/              # executable target (SwiftUI + AppKit)
+  WorkMonitorCore/          # models + CLI output parsers
   Tests/WorkMonitorCoreTests/
 ```
 
-## Сборка
+## Build
 
-Из каталога пакета:
+From the package directory:
 
 ```bash
 cd "work monitor/WorkMonitor"
 swift build -c release
 ```
 
-Сборка **`.app`** (скрипт копирует бинарь и `Info.plist`):
+Build a **`.app`** (copies the binary and `Info.plist`):
 
 ```bash
 ./build.sh
 open WorkMonitor.app
 ```
 
-## Тесты
+## Tests
 
-Юнит-тесты парсеров (`lsof`, Docker format, память, `ps`, HTML title):
+Unit tests cover parsers (`lsof`, Docker `ps` format, memory stats, `ps` RSS lines, HTML `<title>` extraction):
 
 ```bash
 cd "work monitor/WorkMonitor"
 swift test
 ```
 
-В репозитории настроен GitHub Actions: [`.github/workflows/swift-tests.yml`](.github/workflows/swift-tests.yml) — `swift test -c release` на `macos-14`.
+CI: [`.github/workflows/swift-tests.yml`](.github/workflows/swift-tests.yml) runs `swift test -c release` on `macos-14` for pushes and pull requests to `main`.
 
-## Git-хуки
+## Git hooks
 
-После `git clone` один раз:
+After `git clone`, run once:
 
 ```bash
 ./scripts/install-git-hooks.sh
 ```
 
-Хук `commit-msg` убирает служебную строку `Made-with: Cursor` из сообщения коммита.
+This sets `core.hooksPath` to `.githooks`. The `commit-msg` hook strips the `Made-with: Cursor` trailer from commit messages.
 
-## Требования
+## Requirements
 
-- macOS **13** или новее  
-- Xcode / Swift **5.9** (или toolchain с поддержкой пакета)
+- macOS **13** or later  
+- Xcode / Swift **5.9** (or a toolchain that can build this package)
 
-## Лицензия
+## License
 
-См. файл [LICENSE](LICENSE) в корне репозитория.
+See [LICENSE](LICENSE) in the repository root.
