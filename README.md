@@ -32,9 +32,12 @@ cd "work monitor/WorkMonitor"
 swift build -c release
 ```
 
-Build a **`.app`** (copies the binary and `Info.plist`):
+Build a **`.app`** (copies the binary and `Info.plist`). If **`CODESIGN_IDENTITY`** is exported, `build.sh` also **codesigns** the bundle (hardened runtime + `WorkMonitor.entitlements`):
 
 ```bash
+cd "work monitor/WorkMonitor"
+# optional, for release / notarization pipeline:
+# export CODESIGN_IDENTITY='Developer ID Application: Your Name (TEAMID)'
 ./build.sh
 open WorkMonitor.app
 ```

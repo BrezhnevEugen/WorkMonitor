@@ -24,6 +24,17 @@ cp "$BUILD_DIR/$APP_NAME" "$MACOS/$APP_NAME"
 # Copy Info.plist
 cp "$APP_NAME/Info.plist" "$CONTENTS/Info.plist"
 
+if [[ -n "${CODESIGN_IDENTITY:-}" ]]; then
+  echo "=== Codesigning (set CODESIGN_IDENTITY to skip) ==="
+  ENT="$APP_NAME/WorkMonitor.entitlements"
+  [[ -f "$ENT" ]] || { echo "Missing $ENT" >&2; exit 1; }
+  codesign --force --deep --options runtime --timestamp \
+    --entitlements "$ENT" \
+    --sign "$CODESIGN_IDENTITY" \
+    "$APP_BUNDLE"
+  codesign --verify --verbose=2 "$APP_BUNDLE"
+fi
+
 echo "=== Done! ==="
 echo ""
 echo "App bundle created: $APP_BUNDLE"
