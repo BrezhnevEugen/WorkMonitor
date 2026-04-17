@@ -6,12 +6,22 @@ on:
   pull_request:
     branches: [main]
 
+# GitHub is moving JS actions off Node 20; opt into Node 24 for checkout etc.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   test:
-    runs-on: macos-14
+    runs-on: macos-15
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Swift PM tests
-        run: swift test -c release
-        working-directory: "work monitor/WorkMonitor"
+        shell: bash
+        run: |
+          set -euxo pipefail
+          PKG="${GITHUB_WORKSPACE}/work monitor/WorkMonitor"
+          cd "${PKG}"
+          swift --version
+          swift test -c release

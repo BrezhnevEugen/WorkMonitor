@@ -111,7 +111,7 @@ cd "work monitor/WorkMonitor"
 swift test
 ```
 
-CI: [`.github/workflows/swift-tests.yml`](.github/workflows/swift-tests.yml) runs `swift test -c release` on `macos-14` for pushes and pull requests to `main`.
+CI: [`.github/workflows/swift-tests.yml`](.github/workflows/swift-tests.yml) runs `swift test -c release` on `macos-15` for pushes and pull requests to `main`.
 
 ## Git hooks
 
