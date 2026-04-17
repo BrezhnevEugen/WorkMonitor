@@ -5,7 +5,7 @@
 # Codesign (Developer ID Application, hardened runtime):
 #   export CODESIGN_IDENTITY='Developer ID Application: Your Name (TEAMID)'
 #
-# Notarize (pick one) — requires CODESIGN_IDENTITY:
+# Notarize (pick one) - requires CODESIGN_IDENTITY:
 #   A) Keychain profile (recommended locally):
 #        xcrun notarytool store-credentials "workmonitor-notary" \
 #          --apple-id "you@example.com" --team-id TEAMID --password "app-specific-password"

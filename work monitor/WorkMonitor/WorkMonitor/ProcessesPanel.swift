@@ -241,7 +241,7 @@ struct ProcessesDetailView: View {
             // Process list with collapsible sections
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    // System section — collapsed by default
+                    // System section - collapsed by default
                     if !viewModel.systemProcesses.isEmpty {
                         ProcessSectionHeader(
                             title: "System",
@@ -262,7 +262,7 @@ struct ProcessesDetailView: View {
                         }
                     }
 
-                    // User section — expanded by default
+                    // User section - expanded by default
                     if !viewModel.userProcesses.isEmpty {
                         ProcessSectionHeader(
                             title: "User",
@@ -341,7 +341,7 @@ struct ProcessesDetailView: View {
 
                 let gap = viewModel.usedGB - trackedGB - viewModel.wiredGB
                 if gap > 0.5 {
-                    Text("≈ \(String(format: "%.1f", gap)) GB not in table — caches, buffers, GPU, small processes")
+                    Text("≈ \(String(format: "%.1f", gap)) GB not in table - caches, buffers, GPU, small processes")
                         .font(.caption2)
                         .foregroundColor(.secondary.opacity(0.75))
                         .multilineTextAlignment(.trailing)
@@ -490,7 +490,7 @@ struct ProcessRow: View {
                 .foregroundColor(.secondary)
                 .frame(width: 38, alignment: .trailing)
 
-            // Kill button — only for user processes (onKill != nil)
+            // Kill button - only for user processes (onKill != nil)
             if let killAction = onKill {
                 Button(action: { killAction() }) {
                     Image(systemName: "xmark.circle.fill")

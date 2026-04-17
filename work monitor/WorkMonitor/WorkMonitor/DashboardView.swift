@@ -58,7 +58,7 @@ struct DashboardView: View {
                         }
                         .buttonStyle(.plain)
                         .focusable(false)
-                        .help("Ports, Docker, memory, and processes in one menu bar app—support on Boosty if it helps you.")
+                        .help("Ports, Docker, memory, and processes in one menu bar app - support on Boosty if it helps you.")
                         .onHover { h in if h { NSCursor.pointingHand.push() } else { NSCursor.pop() } }
 
                         Button(action: { NSApp.terminate(nil) }) {
@@ -633,7 +633,7 @@ struct AboutView: View {
                             "Checking Docker, listening ports, memory, and heavy processes used to mean jumping between different apps and terminals. That got old fast."
                         )
                         Text(
-                            "Work Monitor is one small menu bar utility that pulls it together—ports, containers, RAM, swap, pressure, and top processes—so you get a quick read on what's actually running, without hunting through everything separately."
+                            "Work Monitor is one small menu bar utility that pulls it together - ports, containers, RAM, swap, pressure, and top processes - so you get a quick read on what's actually running, without hunting through everything separately."
                         )
                         Text(
                             "I built it for day-to-day work and keep it lean on purpose: open the popover, glance, move on. If it saves you time too, you're welcome to chip in on Boosty."
@@ -672,7 +672,7 @@ struct AboutView: View {
                             .font(.subheadline)
                             .fontWeight(.semibold)
                         Text(
-                            "Boosty is the place to tip or follow if you want more of these small, practical macOS tools—your support goes straight into updates and new ideas."
+                            "Boosty is the place to tip or follow if you want more of these small, practical macOS tools - your support goes straight into updates and new ideas."
                         )
                         .font(.caption2)
                         .foregroundColor(.secondary)

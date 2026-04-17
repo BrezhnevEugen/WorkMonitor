@@ -10,7 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private var clickOutsideMonitor: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Hide dock icon — tray-only app
+        // Hide dock icon - tray-only app
         NSApp.setActivationPolicy(.accessory)
 
         monitor = SystemMonitor()

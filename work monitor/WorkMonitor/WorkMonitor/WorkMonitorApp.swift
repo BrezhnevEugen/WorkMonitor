@@ -6,7 +6,7 @@ struct WorkMonitorApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        // No window — tray-only app
+        // No window - tray-only app
         Settings { EmptyView() }
     }
 }
