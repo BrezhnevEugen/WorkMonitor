@@ -242,6 +242,88 @@ public enum ProcessPsOutputParser {
     }
 }
 
+// MARK: - CPU via `top -l 1 -n 0`
+
+public enum TopCPUOutputParser {
+    /// Parses the "CPU usage: X.XX% user, X.XX% sys, X.XX% idle" line that `top -l 1 -n 0`
+    /// prints on macOS. Returns aggregated percentages. Falls back to .zero on mismatch.
+    public static func parseCPU(_ output: String) -> CPUInfo {
+        for line in output.split(separator: "\n") {
+            let str = String(line)
+            guard str.contains("CPU usage") else { continue }
+            // e.g. "CPU usage: 12.34% user, 5.67% sys, 82.00% idle"
+            let scanner = Scanner(string: str)
+            scanner.charactersToBeSkipped = CharacterSet(charactersIn: " :,%\t")
+            _ = scanner.scanUpToString("CPU usage")
+            _ = scanner.scanString("CPU usage")
+            let user = scanner.scanDouble() ?? 0
+            _ = scanner.scanUpToString(",")
+            _ = scanner.scanString(",")
+            let sys = scanner.scanDouble() ?? 0
+            _ = scanner.scanUpToString(",")
+            _ = scanner.scanString(",")
+            let idle = scanner.scanDouble() ?? max(0, 100 - user - sys)
+            let total = min(100, max(0, user + sys))
+            return CPUInfo(percent: total, userPercent: user, systemPercent: sys, idlePercent: idle)
+        }
+        return .zero
+    }
+}
+
+// MARK: - Disk via `df -k /`
+
+public enum DfOutputParser {
+    /// Parses `df -k /` output (blocks in 1K). Returns total/free in GB for the root volume.
+    public static func parseRoot(_ output: String) -> DiskInfo {
+        let lines = output.split(separator: "\n")
+        guard lines.count >= 2 else { return .zero }
+        // Second line: Filesystem 1K-blocks Used Available Capacity iused ifree %iused Mounted on
+        let cols = lines[1].split(separator: " ", omittingEmptySubsequences: true)
+        guard cols.count >= 4 else { return .zero }
+        guard let totalKB = Double(String(cols[1])), let freeKB = Double(String(cols[3])) else { return .zero }
+        let gb = 1024.0 * 1024.0
+        return DiskInfo(totalGB: totalKB / gb, freeGB: freeKB / gb)
+    }
+}
+
+// MARK: - Network via `netstat -ibn`
+
+public enum NetstatOutputParser {
+    /// Parses `netstat -ibn` and returns aggregate bytes-in and bytes-out across
+    /// non-loopback interfaces. The caller computes deltas between samples for rate.
+    public static func parseTotals(_ output: String) -> (inBytes: UInt64, outBytes: UInt64) {
+        var totalIn: UInt64 = 0
+        var totalOut: UInt64 = 0
+        var seenIfaces = Set<String>()
+
+        let lines = output.split(separator: "\n")
+        // header: Name  Mtu   Network   Address   Ipkts Ierrs  Ibytes    Opkts Oerrs  Obytes  Coll
+        // But on macOS the columns are: Name Mtu Network Address Ipkts Ierrs Ibytes Opkts Oerrs Obytes Coll
+        // We match by column index = 6 for Ibytes, 9 for Obytes.
+        for line in lines.dropFirst() {
+            let cols = line.split(separator: " ", omittingEmptySubsequences: true)
+            guard cols.count >= 10 else { continue }
+            let name = String(cols[0])
+            if name.hasPrefix("lo") { continue }            // skip loopback
+            if seenIfaces.contains(name) { continue }       // first row per iface has aggregate
+            seenIfaces.insert(name)
+
+            // Find Ibytes / Obytes — try both layouts:
+            // len 11: ... Ipkts Ierrs Ibytes Opkts Oerrs Obytes Coll
+            // len 10: some interfaces omit Address, shift by 1
+            // Safer: look for the 4th and 7th numeric columns from the right.
+            let numericTail = cols.suffix(7).map { String($0) }
+            guard numericTail.count == 7 else { continue }
+            // tail: Ipkts Ierrs Ibytes Opkts Oerrs Obytes Coll
+            let ibytes = UInt64(numericTail[2]) ?? 0
+            let obytes = UInt64(numericTail[5]) ?? 0
+            totalIn &+= ibytes
+            totalOut &+= obytes
+        }
+        return (totalIn, totalOut)
+    }
+}
+
 // MARK: - HTML title (for web probe)
 
 public enum HTMLTitleParser {

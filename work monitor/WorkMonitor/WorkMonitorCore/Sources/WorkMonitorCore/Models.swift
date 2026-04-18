@@ -144,3 +144,62 @@ public struct MemoryInfo: Equatable {
         }
     }
 }
+
+// MARK: - CPU Info
+
+public struct CPUInfo: Equatable {
+    /// 0...100, aggregate across all cores (user + system).
+    public let percent: Double
+    public let userPercent: Double
+    public let systemPercent: Double
+    public let idlePercent: Double
+
+    public init(percent: Double, userPercent: Double, systemPercent: Double, idlePercent: Double) {
+        self.percent = percent
+        self.userPercent = userPercent
+        self.systemPercent = systemPercent
+        self.idlePercent = idlePercent
+    }
+
+    public static let zero = CPUInfo(percent: 0, userPercent: 0, systemPercent: 0, idlePercent: 100)
+}
+
+// MARK: - Disk Info
+
+public struct DiskInfo: Equatable {
+    public let totalGB: Double
+    public let freeGB: Double
+
+    public init(totalGB: Double, freeGB: Double) {
+        self.totalGB = totalGB
+        self.freeGB = freeGB
+    }
+
+    public var usedGB: Double { max(0, totalGB - freeGB) }
+    public var usagePercent: Double {
+        guard totalGB > 0 else { return 0 }
+        return (usedGB / totalGB) * 100
+    }
+
+    public static let zero = DiskInfo(totalGB: 0, freeGB: 0)
+}
+
+// MARK: - Network Info
+
+public struct NetworkInfo: Equatable {
+    /// Bytes per second — downstream (incoming) rate across all interfaces (last sample).
+    public let downBytesPerSec: Double
+    public let upBytesPerSec: Double
+    /// Cumulative bytes since app start — kept so callers can display totals.
+    public let totalInBytes: UInt64
+    public let totalOutBytes: UInt64
+
+    public init(downBytesPerSec: Double, upBytesPerSec: Double, totalInBytes: UInt64, totalOutBytes: UInt64) {
+        self.downBytesPerSec = downBytesPerSec
+        self.upBytesPerSec = upBytesPerSec
+        self.totalInBytes = totalInBytes
+        self.totalOutBytes = totalOutBytes
+    }
+
+    public static let zero = NetworkInfo(downBytesPerSec: 0, upBytesPerSec: 0, totalInBytes: 0, totalOutBytes: 0)
+}
