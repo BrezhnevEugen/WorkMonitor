@@ -24,6 +24,14 @@ cp "$BUILD_DIR/$APP_NAME" "$MACOS/$APP_NAME"
 # Copy Info.plist
 cp "$APP_NAME/Info.plist" "$CONTENTS/Info.plist"
 
+# Localizations (must live under Contents so codesign seals the app bundle)
+RES_SRC="$APP_NAME/Resources"
+if [[ -d "$RES_SRC/en.lproj" ]]; then
+  mkdir -p "$CONTENTS/Resources"
+  cp -R "$RES_SRC/en.lproj" "$CONTENTS/Resources/"
+  cp -R "$RES_SRC/ru.lproj" "$CONTENTS/Resources/"
+fi
+
 if [[ -n "${CODESIGN_IDENTITY:-}" ]]; then
   echo "=== Codesigning (set CODESIGN_IDENTITY to skip) ==="
   ENT="$APP_NAME/WorkMonitor.entitlements"
