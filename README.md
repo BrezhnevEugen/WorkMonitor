@@ -6,7 +6,7 @@
 
 ## Скачать
 
-Готовый **.dmg** для установки на Mac можно взять в [**Releases**](https://github.com/BrezhnevEugen/WorkMonitor/releases) (удобнее всего [последняя версия](https://github.com/BrezhnevEugen/WorkMonitor/releases/latest)): в блоке **Assets** выберите файл с именем вида `WorkMonitor-1.0.1.dmg` (номер версии может отличаться), откройте образ и перетащите **Work Monitor** в папку «Программы».
+Готовый **.dmg** для установки на Mac можно взять в [**Releases**](https://github.com/BrezhnevEugen/WorkMonitor/releases) (удобнее всего [последняя версия](https://github.com/BrezhnevEugen/WorkMonitor/releases/latest)): в блоке **Assets** выберите файл с именем вида `WorkMonitor-2.0.0.dmg` (номер версии может отличаться), откройте образ и перетащите **Work Monitor** в папку «Программы».
 
 При первом запуске macOS может спросить про приложение из интернета - подтвердите в «Системные настройки» - «Конфиденциальность и безопасность», если нужно.
 
