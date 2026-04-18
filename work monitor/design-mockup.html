@@ -1,0 +1,915 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Work Monitor — Design Mockup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    /* terminal palette */
+    --bg-desktop: #1c1c1e;
+    --bg-menubar: rgba(28, 28, 30, 0.85);
+    --bg-popover: #0d0f11;
+    --bg-popover-elev: #14171a;
+    --bg-row-hover: #1a1e22;
+    --border: #23272c;
+    --border-strong: #2d333a;
+
+    --text: #e6e6e6;
+    --text-dim: #8a8f98;
+    --text-mute: #5a6069;
+
+    --accent: #4ade80;        /* зелёный терминальный */
+    --accent-dim: #2f8a50;
+    --amber: #fbbf24;
+    --red: #ef4444;
+    --blue: #60a5fa;
+    --purple: #a78bfa;
+
+    --mono: "JetBrains Mono", "SF Mono", "Menlo", ui-monospace, monospace;
+    --sans: -apple-system, "SF Pro Text", "Inter", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #0a0a0b;
+    font-family: var(--sans);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== layout ===== */
+  .page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 40px;
+    padding: 40px 48px 80px;
+  }
+
+  .page-header h1 {
+    font-size: 22px;
+    margin: 0 0 6px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+  .page-header p {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+
+  .stage {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 48px;
+    align-items: start;
+  }
+
+  /* ===== macOS desktop frame ===== */
+  .desktop {
+    position: relative;
+    background:
+      radial-gradient(1200px 600px at 20% -10%, #3a2b55 0%, transparent 60%),
+      radial-gradient(900px 500px at 90% 10%, #1e3a5a 0%, transparent 55%),
+      linear-gradient(180deg, #111114 0%, #0a0a0b 100%);
+    border-radius: 14px;
+    border: 1px solid #1b1b1f;
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6);
+    height: 760px;
+    overflow: hidden;
+  }
+
+  .menubar {
+    height: 26px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    background: var(--bg-menubar);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 13px;
+    color: #e9e9ea;
+    font-family: var(--sans);
+  }
+  .menubar .apple { margin-right: 14px; font-size: 14px; }
+  .menubar .app-name { font-weight: 600; margin-right: 16px; }
+  .menubar .menu-item { margin-right: 14px; color: #dcdcdd; }
+  .menubar .spacer { flex: 1; }
+  .menubar .tray { display: flex; align-items: center; gap: 14px; }
+  .menubar .tray .icon {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #c8ccd0;
+    opacity: 0.8;
+  }
+  .menubar .tray .time { font-variant-numeric: tabular-nums; }
+
+  .tray-item-wm {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(74, 222, 128, 0.08);
+    border: 1px solid rgba(74, 222, 128, 0.25);
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+  }
+  .tray-item-wm .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+  .tray-item-wm::after {
+    /* caret that connects to popover */
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 10px; height: 10px;
+    background: var(--bg-popover);
+    border-left: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    transform: translate(-50%, -5px) rotate(45deg);
+  }
+
+  /* ===== popover ===== */
+  .popover {
+    position: absolute;
+    top: 38px;
+    right: 48px;
+    width: 420px;
+    max-height: calc(100% - 60px);
+    background: var(--bg-popover);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  /* header */
+  .pop-header {
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(74, 222, 128, 0.05), transparent);
+  }
+  .pop-header-row {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .pop-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600; color: var(--text);
+  }
+  .pop-title .logo {
+    color: var(--accent);
+    font-family: var(--mono);
+  }
+  .pop-actions { display: flex; gap: 6px; }
+  .icon-btn {
+    width: 24px; height: 24px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+  .icon-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent-dim);
+    background: rgba(74, 222, 128, 0.05);
+  }
+
+  .env-bar {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .env-bar .pill {
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(96, 165, 250, 0.1);
+    color: var(--blue);
+    border: 1px solid rgba(96, 165, 250, 0.25);
+  }
+  .env-bar .pill.ok {
+    background: rgba(74, 222, 128, 0.08);
+    color: var(--accent);
+    border-color: rgba(74, 222, 128, 0.25);
+  }
+
+  /* summary strip */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 10px 14px;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-popover-elev);
+  }
+  .metric .label {
+    font-size: 10px;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 4px;
+  }
+  .metric .value {
+    font-size: 14px;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .metric .value .unit {
+    font-size: 10px;
+    color: var(--text-mute);
+    margin-left: 2px;
+  }
+  .metric .bar {
+    height: 3px;
+    margin-top: 6px;
+    background: #1c2024;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .metric .bar > span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .metric .bar > span.warn { background: var(--amber); }
+  .metric .bar > span.crit { background: var(--red); }
+
+  /* scroll area */
+  .pop-body {
+    overflow-y: auto;
+    max-height: 520px;
+  }
+  .pop-body::-webkit-scrollbar { width: 8px; }
+  .pop-body::-webkit-scrollbar-thumb {
+    background: #222; border-radius: 4px;
+  }
+
+  /* section */
+  .section { border-bottom: 1px solid var(--border); }
+  .section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .section-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px;
+    letter-spacing: 0.4px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  .section-title .count {
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: #1c2024;
+    color: var(--text);
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+  .section-title .caret {
+    color: var(--text-mute);
+    font-size: 9px;
+    transition: transform 0.15s;
+  }
+  .section.collapsed .caret { transform: rotate(-90deg); }
+  .section-actions {
+    display: flex; gap: 4px;
+    font-size: 10px;
+    color: var(--text-mute);
+  }
+  .section-actions a {
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .section-actions a:hover {
+    color: var(--accent);
+    background: rgba(74, 222, 128, 0.06);
+  }
+
+  .rows { padding: 0 6px 8px; }
+  .row {
+    display: grid;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 8px;
+    border-radius: 6px;
+    cursor: default;
+  }
+  .row:hover { background: var(--bg-row-hover); }
+  .row:hover .row-actions { opacity: 1; }
+
+  /* ports row */
+  .row.port { grid-template-columns: 56px 1fr auto auto; }
+  .row.port .port-num {
+    font-weight: 600;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .row.port .proc {
+    color: var(--text);
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .row.port .pid {
+    color: var(--text-mute);
+    font-size: 11px;
+  }
+  .row.port .proc .path {
+    color: var(--text-mute);
+    font-size: 11px;
+  }
+
+  /* docker row */
+  .row.docker { grid-template-columns: 14px 1fr auto; }
+  .row.docker .d-status {
+    width: 8px; height: 8px; border-radius: 50%;
+    justify-self: center;
+  }
+  .d-status.running { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  .d-status.exited  { background: var(--text-mute); }
+  .d-status.unhealthy { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+
+  .row.docker .d-main {
+    display: flex; flex-direction: column; gap: 2px;
+    overflow: hidden;
+  }
+  .row.docker .d-name {
+    color: var(--text);
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .row.docker .d-meta {
+    color: var(--text-mute);
+    font-size: 10px;
+    display: flex; gap: 10px;
+  }
+  .row.docker .d-meta .tag {
+    color: var(--purple);
+  }
+
+  /* process row */
+  .row.proc-row { grid-template-columns: 1fr 60px 60px auto; }
+  .row.proc-row .pname { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row.proc-row .pmetric {
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+    text-align: right;
+  }
+  .row.proc-row .pmetric.hot { color: var(--amber); }
+
+  .row-actions {
+    display: flex; gap: 4px;
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+  .row-actions button {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text-dim);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    cursor: pointer;
+  }
+  .row-actions button:hover { color: var(--accent); border-color: var(--accent-dim); }
+  .row-actions button.danger:hover { color: var(--red); border-color: var(--red); }
+
+  /* footer */
+  .pop-footer {
+    padding: 8px 14px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px;
+    color: var(--text-mute);
+    background: var(--bg-popover-elev);
+  }
+  .pop-footer .left { display: flex; gap: 10px; align-items: center; }
+  .pop-footer .blink {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    animation: blink 1.4s infinite;
+  }
+  @keyframes blink { 50% { opacity: 0.3; } }
+  .pop-footer a {
+    color: var(--text-dim); text-decoration: none; margin-left: 10px; cursor: pointer;
+  }
+  .pop-footer a:hover { color: var(--accent); }
+
+  /* ===== right column: spec ===== */
+  .spec { color: var(--text); font-size: 13px; line-height: 1.55; }
+  .spec h2 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-dim);
+    font-weight: 500;
+    margin: 0 0 10px;
+  }
+  .spec h2:not(:first-of-type) { margin-top: 28px; }
+  .spec p { color: var(--text-dim); margin: 0 0 10px; }
+
+  .tray-variants {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    padding: 10px;
+    background: var(--bg-popover-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .tray-variant {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-family: var(--mono); font-size: 11px;
+    background: rgba(28, 28, 30, 0.9);
+    border: 1px solid var(--border);
+  }
+  .tray-variant .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .tv-ok    { color: var(--accent); }
+  .tv-ok    .dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  .tv-warn  { color: var(--amber);  }
+  .tv-warn  .dot { background: var(--amber);  box-shadow: 0 0 6px var(--amber); }
+  .tv-crit  { color: var(--red);    }
+  .tv-crit  .dot { background: var(--red);    box-shadow: 0 0 6px var(--red); }
+  .tv-idle  { color: var(--text-mute); }
+  .tv-idle  .dot { background: var(--text-mute); }
+
+  .legend {
+    display: grid; grid-template-columns: auto 1fr; gap: 6px 12px;
+    padding: 10px 12px;
+    background: var(--bg-popover-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: var(--mono); font-size: 12px;
+  }
+  .legend code {
+    color: var(--accent); background: transparent;
+  }
+
+  .tokens {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .swatch {
+    background: var(--bg-popover-elev);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    font-family: var(--mono); font-size: 10px;
+  }
+  .swatch .chip {
+    height: 28px; border-radius: 4px;
+    margin-bottom: 6px;
+  }
+  .swatch .name { color: var(--text); }
+  .swatch .val  { color: var(--text-mute); }
+
+  @media (max-width: 1100px) {
+    .stage { grid-template-columns: 1fr; }
+    .desktop { height: 680px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="page-header">
+    <h1>Work Monitor — design mockup</h1>
+    <p>Tray app для macOS · тёмный технический стиль · popover, иконка, информационная структура</p>
+  </div>
+
+  <div class="stage">
+
+    <!-- =============== LEFT: macOS frame with popover =============== -->
+    <div class="desktop">
+
+      <!-- menubar -->
+      <div class="menubar">
+        <span class="apple"></span>
+        <span class="app-name">Finder</span>
+        <span class="menu-item">File</span>
+        <span class="menu-item">Edit</span>
+        <span class="menu-item">View</span>
+        <span class="menu-item">Go</span>
+        <span class="menu-item">Window</span>
+        <span class="menu-item">Help</span>
+        <span class="spacer"></span>
+        <div class="tray">
+          <span class="icon">🔋 87%</span>
+          <span class="icon">📶</span>
+          <span class="icon">🔍</span>
+          <span class="tray-item-wm" title="Work Monitor">
+            <span class="dot"></span>
+            <span>wm · 8</span>
+          </span>
+          <span class="time">Сб 14:02</span>
+        </div>
+      </div>
+
+      <!-- popover -->
+      <div class="popover" role="dialog" aria-label="Work Monitor">
+
+        <!-- header -->
+        <div class="pop-header">
+          <div class="pop-header-row">
+            <div class="pop-title">
+              <span class="logo">▣</span>
+              <span>work-monitor</span>
+            </div>
+            <div class="pop-actions">
+              <button class="icon-btn" title="Обновить">↻</button>
+              <button class="icon-btn" title="Поиск">⌕</button>
+              <button class="icon-btn" title="Настройки">⚙</button>
+            </div>
+          </div>
+          <div class="env-bar">
+            <span class="pill ok">● dev</span>
+            <span>macOS 15.3 · M2 Pro</span>
+            <span style="margin-left:auto">updated 2s ago</span>
+          </div>
+        </div>
+
+        <!-- summary metrics -->
+        <div class="summary">
+          <div class="metric">
+            <div class="label">CPU</div>
+            <div class="value">32<span class="unit">%</span></div>
+            <div class="bar"><span style="width:32%"></span></div>
+          </div>
+          <div class="metric">
+            <div class="label">Memory</div>
+            <div class="value">21.4<span class="unit">/32 GB</span></div>
+            <div class="bar"><span class="warn" style="width:67%"></span></div>
+          </div>
+          <div class="metric">
+            <div class="label">Disk</div>
+            <div class="value">412<span class="unit">GB free</span></div>
+            <div class="bar"><span style="width:41%"></span></div>
+          </div>
+          <div class="metric">
+            <div class="label">Net</div>
+            <div class="value">↓ 1.2<span class="unit">MB/s</span></div>
+            <div class="bar"><span style="width:18%"></span></div>
+          </div>
+        </div>
+
+        <!-- scrollable body -->
+        <div class="pop-body">
+
+          <!-- PORTS -->
+          <div class="section">
+            <div class="section-head">
+              <div class="section-title">
+                <span class="caret">▾</span>
+                <span>Ports</span>
+                <span class="count">5</span>
+              </div>
+              <div class="section-actions">
+                <a>filter</a>
+                <a>export</a>
+              </div>
+            </div>
+            <div class="rows">
+              <div class="row port">
+                <div class="port-num">3000</div>
+                <div class="proc">
+                  <div>node · next-dev</div>
+                  <div class="path">~/projects/storefront</div>
+                </div>
+                <div class="pid">pid 48213</div>
+                <div class="row-actions">
+                  <button>open</button>
+                  <button class="danger">kill</button>
+                </div>
+              </div>
+              <div class="row port">
+                <div class="port-num">5432</div>
+                <div class="proc">
+                  <div>postgres · docker</div>
+                  <div class="path">pg-main · container</div>
+                </div>
+                <div class="pid">pid 49011</div>
+                <div class="row-actions">
+                  <button>logs</button>
+                  <button>open</button>
+                </div>
+              </div>
+              <div class="row port">
+                <div class="port-num">6379</div>
+                <div class="proc">
+                  <div>redis-server</div>
+                  <div class="path">/opt/homebrew/bin/redis</div>
+                </div>
+                <div class="pid">pid 39120</div>
+                <div class="row-actions">
+                  <button>logs</button>
+                  <button class="danger">kill</button>
+                </div>
+              </div>
+              <div class="row port">
+                <div class="port-num">8080</div>
+                <div class="proc">
+                  <div>java · spring-boot</div>
+                  <div class="path">~/work/api-gateway</div>
+                </div>
+                <div class="pid">pid 51204</div>
+                <div class="row-actions">
+                  <button>open</button>
+                  <button class="danger">kill</button>
+                </div>
+              </div>
+              <div class="row port">
+                <div class="port-num">9229</div>
+                <div class="proc">
+                  <div>node · inspector</div>
+                  <div class="path">debug session</div>
+                </div>
+                <div class="pid">pid 48213</div>
+                <div class="row-actions">
+                  <button>attach</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DOCKER -->
+          <div class="section">
+            <div class="section-head">
+              <div class="section-title">
+                <span class="caret">▾</span>
+                <span>Docker</span>
+                <span class="count">3 running</span>
+              </div>
+              <div class="section-actions">
+                <a>compose up</a>
+                <a>prune</a>
+              </div>
+            </div>
+            <div class="rows">
+              <div class="row docker">
+                <div class="d-status running"></div>
+                <div class="d-main">
+                  <div class="d-name">pg-main</div>
+                  <div class="d-meta">
+                    <span class="tag">postgres:16</span>
+                    <span>:5432</span>
+                    <span>up 3h 12m</span>
+                    <span>128 MB</span>
+                  </div>
+                </div>
+                <div class="row-actions">
+                  <button>logs</button>
+                  <button>stop</button>
+                </div>
+              </div>
+              <div class="row docker">
+                <div class="d-status unhealthy"></div>
+                <div class="d-main">
+                  <div class="d-name">api-worker</div>
+                  <div class="d-meta">
+                    <span class="tag">node:20-alpine</span>
+                    <span>:4000</span>
+                    <span>unhealthy</span>
+                    <span>412 MB</span>
+                  </div>
+                </div>
+                <div class="row-actions">
+                  <button>logs</button>
+                  <button>restart</button>
+                </div>
+              </div>
+              <div class="row docker">
+                <div class="d-status running"></div>
+                <div class="d-main">
+                  <div class="d-name">redis-cache</div>
+                  <div class="d-meta">
+                    <span class="tag">redis:7-alpine</span>
+                    <span>:6379</span>
+                    <span>up 1d</span>
+                    <span>42 MB</span>
+                  </div>
+                </div>
+                <div class="row-actions">
+                  <button>logs</button>
+                  <button>stop</button>
+                </div>
+              </div>
+              <div class="row docker">
+                <div class="d-status exited"></div>
+                <div class="d-main">
+                  <div class="d-name">mailhog</div>
+                  <div class="d-meta">
+                    <span class="tag">mailhog/mailhog</span>
+                    <span>exited (0)</span>
+                    <span>5m ago</span>
+                  </div>
+                </div>
+                <div class="row-actions">
+                  <button>start</button>
+                  <button>rm</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- HEAVY PROCESSES -->
+          <div class="section">
+            <div class="section-head">
+              <div class="section-title">
+                <span class="caret">▾</span>
+                <span>Top Processes</span>
+                <span class="count">by RAM</span>
+              </div>
+              <div class="section-actions">
+                <a>cpu</a>
+                <a>ram</a>
+              </div>
+            </div>
+            <div class="rows">
+              <div class="row proc-row">
+                <div class="pname">Docker Desktop</div>
+                <div class="pmetric hot">4.2 GB</div>
+                <div class="pmetric">18%</div>
+                <div class="row-actions"><button>focus</button></div>
+              </div>
+              <div class="row proc-row">
+                <div class="pname">WebStorm</div>
+                <div class="pmetric">2.8 GB</div>
+                <div class="pmetric">6%</div>
+                <div class="row-actions"><button>focus</button></div>
+              </div>
+              <div class="row proc-row">
+                <div class="pname">Google Chrome Helper</div>
+                <div class="pmetric">1.9 GB</div>
+                <div class="pmetric">4%</div>
+                <div class="row-actions"><button>focus</button></div>
+              </div>
+              <div class="row proc-row">
+                <div class="pname">node (next-dev)</div>
+                <div class="pmetric">820 MB</div>
+                <div class="pmetric">12%</div>
+                <div class="row-actions"><button>focus</button></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SERVICES (brew etc.) -->
+          <div class="section">
+            <div class="section-head">
+              <div class="section-title">
+                <span class="caret">▾</span>
+                <span>Services</span>
+                <span class="count">brew · 2</span>
+              </div>
+              <div class="section-actions">
+                <a>brew services</a>
+              </div>
+            </div>
+            <div class="rows">
+              <div class="row docker">
+                <div class="d-status running"></div>
+                <div class="d-main">
+                  <div class="d-name">postgresql@16</div>
+                  <div class="d-meta"><span>brew</span><span>started at boot</span></div>
+                </div>
+                <div class="row-actions">
+                  <button>stop</button>
+                </div>
+              </div>
+              <div class="row docker">
+                <div class="d-status running"></div>
+                <div class="d-main">
+                  <div class="d-name">nginx</div>
+                  <div class="d-meta"><span>brew</span><span>:80, :443</span></div>
+                </div>
+                <div class="row-actions">
+                  <button>reload</button>
+                  <button>stop</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- footer -->
+        <div class="pop-footer">
+          <div class="left">
+            <span class="blink"></span>
+            <span>live · interval 2s</span>
+          </div>
+          <div>
+            <a>⌘,  settings</a>
+            <a>⌘Q  quit</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =============== RIGHT: spec & notes =============== -->
+    <div class="spec">
+
+      <h2>Tray icon · состояния</h2>
+      <p>Иконка в menubar меняется в зависимости от состояния dev-окружения. Маленький текстовый индикатор (<code style="color:var(--accent)">wm · N</code>) показывает количество активных dev-портов — понятно с одного взгляда.</p>
+      <div class="tray-variants">
+        <span class="tray-variant tv-ok">   <span class="dot"></span> wm · 8   </span>
+        <span class="tray-variant tv-idle"> <span class="dot"></span> wm · 0   </span>
+        <span class="tray-variant tv-warn"> <span class="dot"></span> wm · 12  </span>
+        <span class="tray-variant tv-crit"> <span class="dot"></span> wm · RAM </span>
+      </div>
+      <p style="margin-top:10px; font-size:12px;">
+        <b>ok</b> — всё работает · <b>idle</b> — ничего не запущено · <b>warn</b> — unhealthy контейнер или много портов · <b>crit</b> — память &gt; 90% или упал docker.
+      </p>
+
+      <h2>Информационная структура</h2>
+      <div class="legend">
+        <code>Header</code>    <span>env + host + timestamp</span>
+        <code>Summary</code>   <span>CPU · RAM · Disk · Net (всегда видно)</span>
+        <code>Ports</code>     <span>кто слушает что, процесс, pid, kill/open</span>
+        <code>Docker</code>    <span>контейнеры со статусом, портами, памятью</span>
+        <code>Processes</code> <span>топ по RAM/CPU — где утечка</span>
+        <code>Services</code>  <span>brew services, launchd, nginx</span>
+        <code>Footer</code>    <span>live-индикатор, settings, quit</span>
+      </div>
+
+      <h2>Поведение</h2>
+      <p>
+        • Клик по иконке — popover под ней, как у Stats.<br>
+        • <code>⌥</code>+клик — форсированный refresh.<br>
+        • Правый клик — мини-меню (pause, settings, quit).<br>
+        • Секции сворачиваются и запоминают состояние.<br>
+        • Hover по строке — появляются действия (kill / logs / open).<br>
+        • Сетевые данные обновляются каждые 2с, порты/docker — каждые 5с.
+      </p>
+
+      <h2>Цветовые токены</h2>
+      <div class="tokens">
+        <div class="swatch"><div class="chip" style="background:#0d0f11"></div><div class="name">bg</div><div class="val">#0d0f11</div></div>
+        <div class="swatch"><div class="chip" style="background:#14171a"></div><div class="name">bg-elev</div><div class="val">#14171a</div></div>
+        <div class="swatch"><div class="chip" style="background:#4ade80"></div><div class="name">accent</div><div class="val">#4ade80</div></div>
+        <div class="swatch"><div class="chip" style="background:#fbbf24"></div><div class="name">warn</div><div class="val">#fbbf24</div></div>
+        <div class="swatch"><div class="chip" style="background:#ef4444"></div><div class="name">crit</div><div class="val">#ef4444</div></div>
+        <div class="swatch"><div class="chip" style="background:#60a5fa"></div><div class="name">info</div><div class="val">#60a5fa</div></div>
+        <div class="swatch"><div class="chip" style="background:#a78bfa"></div><div class="name">tag</div><div class="val">#a78bfa</div></div>
+        <div class="swatch"><div class="chip" style="background:#8a8f98"></div><div class="name">dim</div><div class="val">#8a8f98</div></div>
+      </div>
+
+      <h2>Типографика</h2>
+      <p>
+        Основной: <code style="color:var(--accent)">JetBrains Mono</code> 12px · цифры tabular.<br>
+        Заголовки секций: uppercase, tracking 0.4px, 11px, dim.<br>
+        Метрики: 14px, значения — tabular-nums, единицы — 10px mute.
+      </p>
+
+    </div>
+  </div>
+
+  <div style="color:var(--text-mute); font-size:11px; font-family:var(--mono); text-align:center;">
+    ▣ work-monitor · draft v0.1 · 2026-04-18
+  </div>
+
+</div>
+
+<script>
+  // collapse sections
+  document.querySelectorAll('.section-head').forEach(h => {
+    h.addEventListener('click', e => {
+      if (e.target.closest('.section-actions')) return;
+      const s = h.closest('.section');
+      s.classList.toggle('collapsed');
+      const rows = s.querySelector('.rows');
+      if (rows) rows.style.display = s.classList.contains('collapsed') ? 'none' : '';
+    });
+  });
+</script>
+
+</body>
+</html>
