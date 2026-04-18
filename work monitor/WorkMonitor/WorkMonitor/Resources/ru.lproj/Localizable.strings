@@ -1,0 +1,128 @@
+/* App & shell */
+"app_title" = "Work Monitor";
+"about" = "О программе";
+"quit" = "Выход";
+"boosty" = "Boosty";
+"boosty_help" = "Порты, Docker, память и процессы в одном меню-бар приложении - поддержка на Boosty, если пригодилось.";
+
+/* Sections */
+"memory" = "Память";
+"processes" = "Процессы";
+"listening_ports" = "Слушающие порты";
+"docker" = "Docker";
+
+/* Memory */
+"ram" = "RAM";
+"label_apps" = "Приложения";
+"label_wired" = "Зарезервированная";
+"label_compressed" = "Сжатая";
+"swap" = "Своп";
+"pressure_label_format" = "Давление: %@";
+"pressure_state_nominal" = "Норма";
+"pressure_state_warn" = "Предупреждение";
+"pressure_state_critical" = "Критично";
+
+/* Ports */
+"no_listening_ports" = "Нет слушающих портов";
+"ports_summary_format" = "Портов: %1$d · приложений: %2$d";
+"ports_web_suffix_format" = " · веб: %1$d";
+"open" = "Открыть";
+"pid_format" = "PID %d";
+
+/* Docker */
+"docker_not_running" = "Docker не запущен или не установлен";
+"no_containers" = "Нет контейнеров";
+"docker_badge_running_format" = "Запущено: %d";
+"docker_summary_running_total_format" = "Запущено: %1$d · всего: %2$d";
+
+/* Language */
+"language_section" = "Язык";
+"language_system" = "Системный";
+"language_english" = "English";
+"language_russian" = "Русский";
+
+/* About */
+"about_back" = "Назад";
+"about_body_1" = "Раньше чтобы проверить Docker, слушающие порты, память и тяжёлые процессы, приходилось прыгать между разными программами и терминалом. Это быстро надоело.";
+"about_body_2" = "Work Monitor - небольшая утилита в строке меню, которая собирает это в одном месте: порты, контейнеры, RAM, swap, давление памяти и топ процессов - чтобы быстро понять, что реально крутится на машине.";
+"about_body_3" = "Я сделал её для повседневной работы и специально не раздуваю: открыл панель, глянул, пошёл дальше. Если она экономит и вам время, можно поддержать на Boosty.";
+"about_feature_ports_title" = "Слушающие порты";
+"about_feature_ports_desc" = "По приложениям, подсказка веб-интерфейса и открытие в браузере";
+"about_feature_docker_title" = "Контейнеры Docker";
+"about_feature_docker_desc" = "Статус, образы, проброс портов";
+"about_feature_memory_title" = "Память";
+"about_feature_memory_desc" = "ОЗУ, своп, давление, разбивка по типам памяти";
+"about_feature_proc_title" = "Процессы";
+"about_feature_proc_desc" = "Топ по памяти, системные и пользовательские, завершение своих";
+"about_info_platform" = "Платформа";
+"about_info_framework" = "Фреймворк";
+"about_info_refresh" = "Обновление";
+"about_info_author" = "Автор";
+"about_info_platform_value" = "macOS 13+";
+"about_info_framework_value" = "Swift + SwiftUI";
+"about_info_refresh_value" = "Настраиваемая (по умолчанию 2с / 15с)";
+"about_info_author_value" = "Eugen Brezhnev";
+"about_support_heading" = "Поддержка";
+"about_support_body" = "На Boosty можно оставить чаевые или подписаться, если хотите больше таких небольших практичных утилит для macOS - поддержка идёт на обновления и новые идеи.";
+"about_boosty_button" = "Поддержать на Boosty";
+"about_version_format" = "v%@";
+
+/* Processes panel */
+"procs_title" = "Топ процессов";
+"procs_col_process" = "Процесс";
+"procs_col_memory" = "Память";
+"procs_col_percent" = "%";
+"procs_section_system" = "Система";
+"procs_section_user" = "Пользователь";
+"procs_listed_in_table" = "В таблице";
+"procs_wired_kernel" = "Зарезервированная (ядро)";
+"procs_compressed" = "Сжатая";
+"procs_total_used" = "Всего занято";
+"procs_footer_gap_format" = "≈ %.1f ГБ вне таблицы - кэш, буферы, GPU, мелкие процессы";
+
+/* v2 — dark technical dashboard */
+"refresh" = "Обновить";
+"settings" = "Настройки";
+"metric_cpu" = "CPU";
+"metric_ram" = "RAM";
+"metric_disk" = "Диск";
+"metric_net" = "Сеть";
+"section_ports" = "Порты";
+"section_docker" = "Docker";
+"section_processes" = "Процессы";
+"footer_live" = "live · 2s";
+"footer_loading" = "обновление…";
+"updated_now" = "только что";
+"updated_secs_ago_format" = "%dс назад";
+"updated_mins_ago_format" = "%dм назад";
+
+/* Settings */
+"settings_language" = "Язык";
+"settings_refresh_section" = "Частота обновления";
+"settings_refresh_open" = "Открытое окно";
+"settings_refresh_open_value" = "каждые 2 с";
+"settings_refresh_bg" = "В фоне";
+"settings_refresh_bg_value" = "каждые 15 с";
+"settings_system_section" = "Система";
+"settings_open_login_items" = "Настроить автозапуск (System Settings)";
+"settings_sections_section" = "Отображать разделы";
+"sections_all_hidden" = "Все разделы скрыты — включите хотя бы один в настройках";
+"settings_ports_section" = "Порты";
+"settings_group_ports_by_app" = "Группировать по приложению";
+"settings_theme_section" = "Тема";
+"theme_auto" = "Авто (по системе)";
+"theme_dark_terminal" = "Тёмная терминальная";
+"theme_light_minimal" = "Светлая минималистичная";
+"theme_midnight_blue" = "Полночь";
+
+/* Updates */
+"settings_updates_section" = "Обновления";
+"settings_updates_current" = "Текущая версия";
+"settings_updates_check_now" = "Проверить";
+"settings_updates_checking" = "проверяю…";
+"settings_updates_up_to_date" = "актуальная версия";
+"settings_updates_available_format" = "доступна v%@";
+"settings_updates_open_release" = "страница релиза";
+"settings_updates_never_checked" = "ещё не проверялось";
+"settings_updates_last_checked_format" = "последняя проверка: %@";
+"settings_updates_auto" = "Проверять автоматически (раз в сутки)";

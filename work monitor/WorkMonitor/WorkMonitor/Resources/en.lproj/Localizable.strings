@@ -1,0 +1,128 @@
+/* App & shell */
+"app_title" = "Work Monitor";
+"about" = "About";
+"quit" = "Quit";
+"boosty" = "Boosty";
+"boosty_help" = "Ports, Docker, memory, and processes in one menu bar app - support on Boosty if it helps you.";
+
+/* Sections */
+"memory" = "Memory";
+"processes" = "Processes";
+"listening_ports" = "Listening Ports";
+"docker" = "Docker";
+
+/* Memory */
+"ram" = "RAM";
+"label_apps" = "Apps";
+"label_wired" = "Wired";
+"label_compressed" = "Compressed";
+"swap" = "Swap";
+"pressure_label_format" = "Pressure: %@";
+"pressure_state_nominal" = "Normal";
+"pressure_state_warn" = "Warning";
+"pressure_state_critical" = "Critical";
+
+/* Ports */
+"no_listening_ports" = "No listening ports detected";
+"ports_summary_format" = "%1$d ports · %2$d apps";
+"ports_web_suffix_format" = " · %1$d web";
+"open" = "Open";
+"pid_format" = "PID %d";
+
+/* Docker */
+"docker_not_running" = "Docker is not running or not installed";
+"no_containers" = "No containers";
+"docker_badge_running_format" = "%d running";
+"docker_summary_running_total_format" = "%1$d running · %2$d total";
+
+/* Language */
+"language_section" = "Language";
+"language_system" = "System";
+"language_english" = "English";
+"language_russian" = "Russian";
+
+/* About */
+"about_back" = "Back";
+"about_body_1" = "Checking Docker, listening ports, memory, and heavy processes used to mean jumping between different apps and terminals. That got old fast.";
+"about_body_2" = "Work Monitor is one small menu bar utility that pulls it together - ports, containers, RAM, swap, pressure, and top processes - so you get a quick read on what's actually running, without hunting through everything separately.";
+"about_body_3" = "I built it for day-to-day work and keep it lean on purpose: open the popover, glance, move on. If it saves you time too, you're welcome to chip in on Boosty.";
+"about_feature_ports_title" = "Listening Ports";
+"about_feature_ports_desc" = "Grouped by app, web panel detection with one-click open";
+"about_feature_docker_title" = "Docker Containers";
+"about_feature_docker_desc" = "Running status, images, port mappings";
+"about_feature_memory_title" = "Memory Monitor";
+"about_feature_memory_desc" = "RAM, Swap, pressure level, Apps/Wired/Compressed breakdown";
+"about_feature_proc_title" = "Process Manager";
+"about_feature_proc_desc" = "Top processes by memory, system vs user, kill user processes";
+"about_info_platform" = "Platform";
+"about_info_framework" = "Framework";
+"about_info_refresh" = "Refresh";
+"about_info_author" = "Author";
+"about_info_platform_value" = "macOS 13+";
+"about_info_framework_value" = "Swift + SwiftUI";
+"about_info_refresh_value" = "Configurable (default 2s / 15s)";
+"about_info_author_value" = "Eugen Brezhnev";
+"about_support_heading" = "Support";
+"about_support_body" = "Boosty is the place to tip or follow if you want more of these small, practical macOS tools - your support goes straight into updates and new ideas.";
+"about_boosty_button" = "Support on Boosty";
+"about_version_format" = "v%@";
+
+/* Processes panel */
+"procs_title" = "Top Processes";
+"procs_col_process" = "Process";
+"procs_col_memory" = "Memory";
+"procs_col_percent" = "%";
+"procs_section_system" = "System";
+"procs_section_user" = "User";
+"procs_listed_in_table" = "Listed in table";
+"procs_wired_kernel" = "Wired (kernel)";
+"procs_compressed" = "Compressed";
+"procs_total_used" = "Total used";
+"procs_footer_gap_format" = "≈ %.1f GB not in table - caches, buffers, GPU, small processes";
+
+/* v2 — dark technical dashboard */
+"refresh" = "Refresh";
+"settings" = "Settings";
+"metric_cpu" = "CPU";
+"metric_ram" = "RAM";
+"metric_disk" = "Disk";
+"metric_net" = "Net";
+"section_ports" = "Ports";
+"section_docker" = "Docker";
+"section_processes" = "Processes";
+"footer_live" = "live · 2s";
+"footer_loading" = "refreshing…";
+"updated_now" = "just now";
+"updated_secs_ago_format" = "%ds ago";
+"updated_mins_ago_format" = "%dm ago";
+
+/* Settings */
+"settings_language" = "Language";
+"settings_refresh_section" = "Refresh rate";
+"settings_refresh_open" = "Popover open";
+"settings_refresh_open_value" = "every 2 s";
+"settings_refresh_bg" = "Background";
+"settings_refresh_bg_value" = "every 15 s";
+"settings_system_section" = "System";
+"settings_open_login_items" = "Configure login items (System Settings)";
+"settings_sections_section" = "Visible sections";
+"sections_all_hidden" = "All sections hidden — enable at least one in settings";
+"settings_ports_section" = "Ports";
+"settings_group_ports_by_app" = "Group by app";
+"settings_theme_section" = "Theme";
+"theme_auto" = "Auto (follow system)";
+"theme_dark_terminal" = "Dark terminal";
+"theme_light_minimal" = "Light minimal";
+"theme_midnight_blue" = "Midnight";
+
+/* Updates */
+"settings_updates_section" = "Updates";
+"settings_updates_current" = "Current version";
+"settings_updates_check_now" = "Check";
+"settings_updates_checking" = "checking…";
+"settings_updates_up_to_date" = "up to date";
+"settings_updates_available_format" = "v%@ available";
+"settings_updates_open_release" = "release page";
+"settings_updates_never_checked" = "not checked yet";
+"settings_updates_last_checked_format" = "last check: %@";
+"settings_updates_auto" = "Check automatically (once a day)";
