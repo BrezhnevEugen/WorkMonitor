@@ -6,10 +6,10 @@
 #   export CODESIGN_IDENTITY='Developer ID Application: Your Name (TEAMID)'
 #
 # Notarize (pick one) - requires CODESIGN_IDENTITY:
-#   A) Keychain profile (recommended locally):
-#        xcrun notarytool store-credentials "workmonitor-notary" \
+#   A) Keychain profile (recommended locally); profile label is arbitrary (e.g. WorkMonitor-Notary):
+#        xcrun notarytool store-credentials "WorkMonitor-Notary" \
 #          --apple-id "you@example.com" --team-id TEAMID --password "app-specific-password"
-#        export NOTARY_KEYCHAIN_PROFILE=workmonitor-notary
+#        export NOTARY_KEYCHAIN_PROFILE="WorkMonitor-Notary"
 #   B) Inline app-specific password:
 #        export APPLE_ID=you@example.com APPLE_TEAM_ID=TEAMID APPLE_APP_PASSWORD=xxxx-xxxx-xxxx-xxxx
 #   C) App Store Connect API key:
