@@ -9,7 +9,7 @@ final class ProcessesPanel {
     static let shared = ProcessesPanel()
 
     private var panel: NSPanel?
-    private var hostingView: NSHostingView<ProcessesDetailView>?
+    private var hostingView: NSHostingView<AnyView>?
     private let panelWidth: CGFloat = 372
     private let panelHeight: CGFloat = 560
 
@@ -40,8 +40,11 @@ final class ProcessesPanel {
         }
 
         let viewModel = ProcessesViewModel(processes: processes, totalGB: memory.totalGB, wiredGB: memory.wiredGB, compressedGB: memory.compressedGB, appMemoryGB: memory.appMemoryGB, usedGB: memory.usedGB, onClose: { [weak self] in self?.close() })
-        let view = ProcessesDetailView(viewModel: viewModel)
-        let hosting = NSHostingView(rootView: view)
+        let root = AnyView(
+            ProcessesDetailView(viewModel: viewModel)
+                .environmentObject(LocalizationManager.shared)
+        )
+        let hosting = NSHostingView(rootView: root)
         hostingView = hosting
 
         let panel = NSPanel(
@@ -79,7 +82,10 @@ final class ProcessesPanel {
 
     private func updateContent(processes: [ProcessMemoryInfo], memory: MemoryInfo) {
         let viewModel = ProcessesViewModel(processes: processes, totalGB: memory.totalGB, wiredGB: memory.wiredGB, compressedGB: memory.compressedGB, appMemoryGB: memory.appMemoryGB, usedGB: memory.usedGB, onClose: { [weak self] in self?.close() })
-        hostingView?.rootView = ProcessesDetailView(viewModel: viewModel)
+        hostingView?.rootView = AnyView(
+            ProcessesDetailView(viewModel: viewModel)
+                .environmentObject(LocalizationManager.shared)
+        )
     }
 
     private func positionPanel(_ panel: NSPanel) {
@@ -178,6 +184,7 @@ final class ProcessesViewModel: ObservableObject {
 
 struct ProcessesDetailView: View {
     @ObservedObject var viewModel: ProcessesViewModel
+    @EnvironmentObject private var loc: LocalizationManager
     @State private var systemExpanded: Bool = false
     @State private var userExpanded: Bool = true
 
@@ -188,7 +195,7 @@ struct ProcessesDetailView: View {
                 Image(systemName: "memorychip")
                     .font(.caption)
                     .foregroundColor(.accentColor)
-                Text("Top Processes")
+                Text(loc.tr("procs_title"))
                     .font(.headline)
                     .fontWeight(.semibold)
                 Spacer()
@@ -214,18 +221,18 @@ struct ProcessesDetailView: View {
                     .foregroundColor(.secondary)
                     .frame(width: 28, alignment: .trailing)
 
-                SortableHeader(title: "Process", field: .name, current: viewModel.sortBy, ascending: viewModel.sortAscending) {
+                SortableHeader(title: loc.tr("procs_col_process"), field: .name, current: viewModel.sortBy, ascending: viewModel.sortAscending) {
                     viewModel.toggleSort(.name)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 6)
 
-                SortableHeader(title: "Memory", field: .memory, current: viewModel.sortBy, ascending: viewModel.sortAscending) {
+                SortableHeader(title: loc.tr("procs_col_memory"), field: .memory, current: viewModel.sortBy, ascending: viewModel.sortAscending) {
                     viewModel.toggleSort(.memory)
                 }
                 .frame(width: 68, alignment: .trailing)
 
-                SortableHeader(title: "%", field: .percent, current: viewModel.sortBy, ascending: viewModel.sortAscending) {
+                SortableHeader(title: loc.tr("procs_col_percent"), field: .percent, current: viewModel.sortBy, ascending: viewModel.sortAscending) {
                     viewModel.toggleSort(.percent)
                 }
                 .frame(width: 38, alignment: .trailing)
@@ -244,7 +251,7 @@ struct ProcessesDetailView: View {
                     // System section - collapsed by default
                     if !viewModel.systemProcesses.isEmpty {
                         ProcessSectionHeader(
-                            title: "System",
+                            title: loc.tr("procs_section_system"),
                             icon: "gearshape.fill",
                             totalMB: viewModel.systemProcesses.reduce(0) { $0 + $1.memoryMB },
                             count: viewModel.systemProcesses.count,
@@ -265,7 +272,7 @@ struct ProcessesDetailView: View {
                     // User section - expanded by default
                     if !viewModel.userProcesses.isEmpty {
                         ProcessSectionHeader(
-                            title: "User",
+                            title: loc.tr("procs_section_user"),
                             icon: "person.fill",
                             totalMB: viewModel.userProcesses.reduce(0) { $0 + $1.memoryMB },
                             count: viewModel.userProcesses.count,
@@ -295,32 +302,32 @@ struct ProcessesDetailView: View {
                 let trackedGB = viewModel.processes.reduce(0.0) { $0 + $1.memoryMB } / 1024
 
                 HStack {
-                    Text("Listed in table")
+                    Text(loc.tr("procs_listed_in_table"))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text(String(format: "%.1f GB", trackedGB))
+                    Text(loc.formatGigabytesOneDecimal(trackedGB))
                         .font(.caption2.monospaced())
                         .fontWeight(.medium)
                         .foregroundColor(.primary)
                 }
 
                 HStack {
-                    Text("Wired (kernel)")
+                    Text(loc.tr("procs_wired_kernel"))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text(String(format: "%.1f GB", viewModel.wiredGB))
+                    Text(loc.formatGigabytesOneDecimal(viewModel.wiredGB))
                         .font(.caption2.monospaced())
                         .foregroundColor(.primary)
                 }
 
                 HStack {
-                    Text("Compressed")
+                    Text(loc.tr("procs_compressed"))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text(String(format: "%.1f GB", viewModel.compressedGB))
+                    Text(loc.formatGigabytesOneDecimal(viewModel.compressedGB))
                         .font(.caption2.monospaced())
                         .foregroundColor(.primary)
                 }
@@ -328,12 +335,12 @@ struct ProcessesDetailView: View {
                 Divider().opacity(0.25)
 
                 HStack {
-                    Text("Total used")
+                    Text(loc.tr("procs_total_used"))
                         .font(.caption2)
                         .fontWeight(.medium)
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text(String(format: "%.1f / %.0f GB", viewModel.usedGB, viewModel.totalGB))
+                    Text(loc.formatRamUsedTotalLine(used: viewModel.usedGB, total: viewModel.totalGB))
                         .font(.caption2.monospaced())
                         .fontWeight(.medium)
                         .foregroundColor(.primary)
@@ -341,7 +348,7 @@ struct ProcessesDetailView: View {
 
                 let gap = viewModel.usedGB - trackedGB - viewModel.wiredGB
                 if gap > 0.5 {
-                    Text("≈ \(String(format: "%.1f", gap)) GB not in table - caches, buffers, GPU, small processes")
+                    Text(String(format: loc.tr("procs_footer_gap_format"), gap))
                         .font(.caption2)
                         .foregroundColor(.secondary.opacity(0.75))
                         .multilineTextAlignment(.trailing)
@@ -356,11 +363,6 @@ struct ProcessesDetailView: View {
         .background(Color(nsColor: .windowBackgroundColor))
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .shadow(color: .black.opacity(0.12), radius: 10, y: 3)
-    }
-
-    private func formatMemory(_ mb: Double) -> String {
-        if mb >= 1024 { return String(format: "%.1f GB", mb / 1024) }
-        return String(format: "%.0f MB", mb)
     }
 }
 
@@ -400,6 +402,7 @@ struct ProcessSectionHeader: View {
     let totalMB: Double
     let count: Int
     @Binding var isExpanded: Bool
+    @EnvironmentObject private var loc: LocalizationManager
 
     var body: some View {
         Button(action: { withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() } }) {
@@ -419,7 +422,7 @@ struct ProcessSectionHeader: View {
                     .font(.caption2)
                     .foregroundColor(.secondary.opacity(0.7))
                 Spacer()
-                Text(formatMemory(totalMB))
+                Text(loc.formatMegabytesOrGigabytes(totalMB))
                     .font(.caption2.monospaced())
                     .foregroundColor(.secondary)
             }
@@ -432,11 +435,6 @@ struct ProcessSectionHeader: View {
         .focusable(false)
         .onHover { h in if h { NSCursor.pointingHand.push() } else { NSCursor.pop() } }
     }
-
-    private func formatMemory(_ mb: Double) -> String {
-        if mb >= 1024 { return String(format: "%.1f GB", mb / 1024) }
-        return String(format: "%.0f MB", mb)
-    }
 }
 
 // MARK: - Process Row
@@ -445,6 +443,7 @@ struct ProcessRow: View {
     let index: Int
     let process: ProcessMemoryInfo
     var onKill: (() -> Void)?
+    @EnvironmentObject private var loc: LocalizationManager
     @State private var isHovered = false
 
     private let miniBarHeight: CGFloat = 4
@@ -480,7 +479,7 @@ struct ProcessRow: View {
             .padding(.leading, 6)
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text(formatMemory(process.memoryMB))
+            Text(loc.formatMegabytesOrGigabytes(process.memoryMB))
                 .font(.caption2.monospaced())
                 .foregroundColor(.primary)
                 .frame(width: 68, alignment: .trailing)
@@ -515,10 +514,5 @@ struct ProcessRow: View {
         if process.memoryMB >= 2048 { return .red }
         if process.memoryMB >= 512 { return .orange }
         return .blue
-    }
-
-    private func formatMemory(_ mb: Double) -> String {
-        if mb >= 1024 { return String(format: "%.1f GB", mb / 1024) }
-        return String(format: "%.0f MB", mb)
     }
 }
