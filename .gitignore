@@ -1,4 +1,6 @@
 .DS_Store
+.cursor/rules/
+.githooks/
 **/.build/
 *.app/
 *.dSYM/
