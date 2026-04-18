@@ -12,10 +12,16 @@ final class SystemMonitor: ObservableObject {
         pressure: .nominal,
         appMemoryGB: 0, wiredGB: 0, compressedGB: 0
     )
+    @Published var cpu: CPUInfo = .zero
+    @Published var disk: DiskInfo = .zero
+    @Published var network: NetworkInfo = .zero
     @Published var dockerAvailable: Bool = true
     @Published var topProcesses: [ProcessMemoryInfo] = []
     @Published var lastUpdated: Date = Date()
     @Published var isLoading: Bool = false
+
+    /// Last raw netstat totals + timestamp, used to compute bytes-per-second between samples.
+    private var lastNetTotals: (inBytes: UInt64, outBytes: UInt64, at: Date)?
 
     func refresh() {
         isLoading = true
@@ -24,19 +30,66 @@ final class SystemMonitor: ObservableObject {
             async let d = Self.fetchDockerContainers()
             async let m = Self.fetchMemory()
             async let t = Self.fetchTopProcesses()
+            async let c = Self.fetchCPU()
+            async let dk = Self.fetchDisk()
+            async let n = Self.fetchNetTotals()
 
-            var (newPorts, dockerResult, newMemory, newTop) = await (p, d, m, t)
+            var (newPorts, dockerResult, newMemory, newTop, newCPU, newDisk, netTotals)
+                = await (p, d, m, t, c, dk, n)
 
             newPorts = await Self.probeWebUIs(ports: newPorts)
+
+            let now = Date()
+            let newNetwork: NetworkInfo
+            if let prev = self.lastNetTotals {
+                let dt = max(0.25, now.timeIntervalSince(prev.at))
+                let din = netTotals.inBytes >= prev.inBytes ? netTotals.inBytes - prev.inBytes : 0
+                let dout = netTotals.outBytes >= prev.outBytes ? netTotals.outBytes - prev.outBytes : 0
+                newNetwork = NetworkInfo(
+                    downBytesPerSec: Double(din) / dt,
+                    upBytesPerSec: Double(dout) / dt,
+                    totalInBytes: netTotals.inBytes,
+                    totalOutBytes: netTotals.outBytes
+                )
+            } else {
+                newNetwork = NetworkInfo(
+                    downBytesPerSec: 0,
+                    upBytesPerSec: 0,
+                    totalInBytes: netTotals.inBytes,
+                    totalOutBytes: netTotals.outBytes
+                )
+            }
+            self.lastNetTotals = (netTotals.inBytes, netTotals.outBytes, now)
 
             self.ports = newPorts
             self.containers = dockerResult.containers
             self.dockerAvailable = dockerResult.available
             self.memory = newMemory
             self.topProcesses = newTop
-            self.lastUpdated = Date()
+            self.cpu = newCPU
+            self.disk = newDisk
+            self.network = newNetwork
+            self.lastUpdated = now
             self.isLoading = false
         }
+    }
+
+    // MARK: - CPU / Disk / Network
+
+    private static func fetchCPU() async -> CPUInfo {
+        // `-n 0` means skip per-process list — we only need the header line.
+        let output = await shell("/bin/sh", args: ["-c", "top -l 1 -n 0 2>/dev/null"])
+        return TopCPUOutputParser.parseCPU(output)
+    }
+
+    private static func fetchDisk() async -> DiskInfo {
+        let output = await shell("/bin/sh", args: ["-c", "df -k / 2>/dev/null"])
+        return DfOutputParser.parseRoot(output)
+    }
+
+    private static func fetchNetTotals() async -> (inBytes: UInt64, outBytes: UInt64) {
+        let output = await shell("/bin/sh", args: ["-c", "netstat -ibn 2>/dev/null"])
+        return NetstatOutputParser.parseTotals(output)
     }
 
     // MARK: - Ports via lsof
